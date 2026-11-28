@@ -1,0 +1,1545 @@
+{
+ "frames": {
+  "sprite-axe-0 0": {
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-axe-0 1": {
+   "frame": {
+    "x": 32,
+    "y": 0,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-axe-1 0": {
+   "frame": {
+    "x": 64,
+    "y": 0,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-axe-1 1": {
+   "frame": {
+    "x": 96,
+    "y": 0,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-axe-2 0": {
+   "frame": {
+    "x": 128,
+    "y": 0,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-axe-2 1": {
+   "frame": {
+    "x": 160,
+    "y": 0,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-bandana-0 0": {
+   "frame": {
+    "x": 192,
+    "y": 0,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-bandana-0 1": {
+   "frame": {
+    "x": 224,
+    "y": 0,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-bandana-1 0": {
+   "frame": {
+    "x": 0,
+    "y": 48,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-bandana-1 1": {
+   "frame": {
+    "x": 32,
+    "y": 48,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-bandana-2 0": {
+   "frame": {
+    "x": 64,
+    "y": 48,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-bandana-2 1": {
+   "frame": {
+    "x": 96,
+    "y": 48,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-beard-0 0": {
+   "frame": {
+    "x": 128,
+    "y": 48,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-beard-0 1": {
+   "frame": {
+    "x": 160,
+    "y": 48,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-beard-1 0": {
+   "frame": {
+    "x": 192,
+    "y": 48,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-beard-1 1": {
+   "frame": {
+    "x": 224,
+    "y": 48,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-beard-2 0": {
+   "frame": {
+    "x": 0,
+    "y": 96,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-beard-2 1": {
+   "frame": {
+    "x": 32,
+    "y": 96,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-cap-0 0": {
+   "frame": {
+    "x": 64,
+    "y": 96,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-cap-0 1": {
+   "frame": {
+    "x": 96,
+    "y": 96,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-cap-1 0": {
+   "frame": {
+    "x": 128,
+    "y": 96,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-cap-1 1": {
+   "frame": {
+    "x": 160,
+    "y": 96,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-cap-2 0": {
+   "frame": {
+    "x": 192,
+    "y": 96,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-cap-2 1": {
+   "frame": {
+    "x": 224,
+    "y": 96,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-carried-0 0": {
+   "frame": {
+    "x": 0,
+    "y": 144,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-carried-0 1": {
+   "frame": {
+    "x": 32,
+    "y": 144,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-carried-1 0": {
+   "frame": {
+    "x": 64,
+    "y": 144,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-carried-1 1": {
+   "frame": {
+    "x": 96,
+    "y": 144,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-carried-2 0": {
+   "frame": {
+    "x": 128,
+    "y": 144,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-carried-2 1": {
+   "frame": {
+    "x": 160,
+    "y": 144,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-casual-0 0": {
+   "frame": {
+    "x": 192,
+    "y": 144,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-casual-0 1": {
+   "frame": {
+    "x": 224,
+    "y": 144,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-casual-1 0": {
+   "frame": {
+    "x": 0,
+    "y": 192,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-casual-1 1": {
+   "frame": {
+    "x": 32,
+    "y": 192,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-casual-2 0": {
+   "frame": {
+    "x": 64,
+    "y": 192,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-casual-2 1": {
+   "frame": {
+    "x": 96,
+    "y": 192,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-dresses-0 0": {
+   "frame": {
+    "x": 128,
+    "y": 192,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-dresses-0 1": {
+   "frame": {
+    "x": 160,
+    "y": 192,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-dresses-1 0": {
+   "frame": {
+    "x": 192,
+    "y": 192,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-dresses-1 1": {
+   "frame": {
+    "x": 224,
+    "y": 192,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-dresses-2 0": {
+   "frame": {
+    "x": 0,
+    "y": 240,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-dresses-2 1": {
+   "frame": {
+    "x": 32,
+    "y": 240,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-everyday-bottoms-0 0": {
+   "frame": {
+    "x": 64,
+    "y": 240,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-everyday-bottoms-0 1": {
+   "frame": {
+    "x": 96,
+    "y": 240,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-everyday-bottoms-1 0": {
+   "frame": {
+    "x": 128,
+    "y": 240,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-everyday-bottoms-1 1": {
+   "frame": {
+    "x": 160,
+    "y": 240,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-everyday-bottoms-2 0": {
+   "frame": {
+    "x": 192,
+    "y": 240,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-everyday-bottoms-2 1": {
+   "frame": {
+    "x": 224,
+    "y": 240,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-formal-0 0": {
+   "frame": {
+    "x": 0,
+    "y": 288,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-formal-0 1": {
+   "frame": {
+    "x": 32,
+    "y": 288,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-formal-1 0": {
+   "frame": {
+    "x": 64,
+    "y": 288,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-formal-1 1": {
+   "frame": {
+    "x": 96,
+    "y": 288,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-formal-2 0": {
+   "frame": {
+    "x": 128,
+    "y": 288,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-formal-2 1": {
+   "frame": {
+    "x": 160,
+    "y": 288,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-hat-0 0": {
+   "frame": {
+    "x": 192,
+    "y": 288,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-hat-0 1": {
+   "frame": {
+    "x": 224,
+    "y": 288,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-hat-1 0": {
+   "frame": {
+    "x": 0,
+    "y": 336,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-hat-1 1": {
+   "frame": {
+    "x": 32,
+    "y": 336,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-hat-2 0": {
+   "frame": {
+    "x": 64,
+    "y": 336,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-hat-2 1": {
+   "frame": {
+    "x": 96,
+    "y": 336,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-leafskirt-0 0": {
+   "frame": {
+    "x": 128,
+    "y": 336,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-leafskirt-0 1": {
+   "frame": {
+    "x": 160,
+    "y": 336,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-leafskirt-1 0": {
+   "frame": {
+    "x": 192,
+    "y": 336,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-leafskirt-1 1": {
+   "frame": {
+    "x": 224,
+    "y": 336,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-leafskirt-2 0": {
+   "frame": {
+    "x": 0,
+    "y": 384,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-leafskirt-2 1": {
+   "frame": {
+    "x": 32,
+    "y": 384,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-rod-0 0": {
+   "frame": {
+    "x": 64,
+    "y": 384,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-rod-0 1": {
+   "frame": {
+    "x": 96,
+    "y": 384,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-rod-1 0": {
+   "frame": {
+    "x": 128,
+    "y": 384,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-rod-1 1": {
+   "frame": {
+    "x": 160,
+    "y": 384,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-rod-2 0": {
+   "frame": {
+    "x": 192,
+    "y": 384,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-rod-2 1": {
+   "frame": {
+    "x": 224,
+    "y": 384,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shirt-0 0": {
+   "frame": {
+    "x": 0,
+    "y": 432,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shirt-0 1": {
+   "frame": {
+    "x": 32,
+    "y": 432,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shirt-1 0": {
+   "frame": {
+    "x": 64,
+    "y": 432,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shirt-1 1": {
+   "frame": {
+    "x": 96,
+    "y": 432,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shirt-2 0": {
+   "frame": {
+    "x": 128,
+    "y": 432,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shirt-2 1": {
+   "frame": {
+    "x": 160,
+    "y": 432,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shorts-0 0": {
+   "frame": {
+    "x": 192,
+    "y": 432,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shorts-0 1": {
+   "frame": {
+    "x": 224,
+    "y": 432,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shorts-1 0": {
+   "frame": {
+    "x": 0,
+    "y": 480,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shorts-1 1": {
+   "frame": {
+    "x": 32,
+    "y": 480,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shorts-2 0": {
+   "frame": {
+    "x": 64,
+    "y": 480,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-shorts-2 1": {
+   "frame": {
+    "x": 96,
+    "y": 480,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-spear-0 0": {
+   "frame": {
+    "x": 128,
+    "y": 480,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-spear-0 1": {
+   "frame": {
+    "x": 160,
+    "y": 480,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-spear-1 0": {
+   "frame": {
+    "x": 192,
+    "y": 480,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-spear-1 1": {
+   "frame": {
+    "x": 224,
+    "y": 480,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-spear-2 0": {
+   "frame": {
+    "x": 0,
+    "y": 528,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-spear-2 1": {
+   "frame": {
+    "x": 32,
+    "y": 528,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-vest-0 0": {
+   "frame": {
+    "x": 64,
+    "y": 528,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-vest-0 1": {
+   "frame": {
+    "x": 96,
+    "y": 528,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-vest-1 0": {
+   "frame": {
+    "x": 128,
+    "y": 528,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-vest-1 1": {
+   "frame": {
+    "x": 160,
+    "y": 528,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-vest-2 0": {
+   "frame": {
+    "x": 192,
+    "y": 528,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  },
+  "sprite-vest-2 1": {
+   "frame": {
+    "x": 224,
+    "y": 528,
+    "w": 32,
+    "h": 48
+   },
+   "duration": 100
+  }
+ },
+ "meta": {
+  "app": "pixel-engine images",
+  "version": "1",
+  "image": "wear.png",
+  "format": "I8",
+  "size": {
+   "w": 256,
+   "h": 576
+  },
+  "palette": "game",
+  "frameTags": [
+   {
+    "name": "sprite-axe-0",
+    "from": 0,
+    "to": 1,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-axe-1",
+    "from": 2,
+    "to": 3,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-axe-2",
+    "from": 4,
+    "to": 5,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-bandana-0",
+    "from": 6,
+    "to": 7,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-bandana-1",
+    "from": 8,
+    "to": 9,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-bandana-2",
+    "from": 10,
+    "to": 11,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-beard-0",
+    "from": 12,
+    "to": 13,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-beard-1",
+    "from": 14,
+    "to": 15,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-beard-2",
+    "from": 16,
+    "to": 17,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-cap-0",
+    "from": 18,
+    "to": 19,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-cap-1",
+    "from": 20,
+    "to": 21,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-cap-2",
+    "from": 22,
+    "to": 23,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-carried-0",
+    "from": 24,
+    "to": 25,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-carried-1",
+    "from": 26,
+    "to": 27,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-carried-2",
+    "from": 28,
+    "to": 29,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-casual-0",
+    "from": 30,
+    "to": 31,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-casual-1",
+    "from": 32,
+    "to": 33,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-casual-2",
+    "from": 34,
+    "to": 35,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-dresses-0",
+    "from": 36,
+    "to": 37,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-dresses-1",
+    "from": 38,
+    "to": 39,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-dresses-2",
+    "from": 40,
+    "to": 41,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-everyday-bottoms-0",
+    "from": 42,
+    "to": 43,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-everyday-bottoms-1",
+    "from": 44,
+    "to": 45,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-everyday-bottoms-2",
+    "from": 46,
+    "to": 47,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-formal-0",
+    "from": 48,
+    "to": 49,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-formal-1",
+    "from": 50,
+    "to": 51,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-formal-2",
+    "from": 52,
+    "to": 53,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-hat-0",
+    "from": 54,
+    "to": 55,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-hat-1",
+    "from": 56,
+    "to": 57,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-hat-2",
+    "from": 58,
+    "to": 59,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-leafskirt-0",
+    "from": 60,
+    "to": 61,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-leafskirt-1",
+    "from": 62,
+    "to": 63,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-leafskirt-2",
+    "from": 64,
+    "to": 65,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-rod-0",
+    "from": 66,
+    "to": 67,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-rod-1",
+    "from": 68,
+    "to": 69,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-rod-2",
+    "from": 70,
+    "to": 71,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-shirt-0",
+    "from": 72,
+    "to": 73,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-shirt-1",
+    "from": 74,
+    "to": 75,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-shirt-2",
+    "from": 76,
+    "to": 77,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-shorts-0",
+    "from": 78,
+    "to": 79,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-shorts-1",
+    "from": 80,
+    "to": 81,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-shorts-2",
+    "from": 82,
+    "to": 83,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-spear-0",
+    "from": 84,
+    "to": 85,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-spear-1",
+    "from": 86,
+    "to": 87,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-spear-2",
+    "from": 88,
+    "to": 89,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-vest-0",
+    "from": 90,
+    "to": 91,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-vest-1",
+    "from": 92,
+    "to": 93,
+    "direction": "forward"
+   },
+   {
+    "name": "sprite-vest-2",
+    "from": 94,
+    "to": 95,
+    "direction": "forward"
+   }
+  ],
+  "slices": [],
+  "names": {
+   "1": "wood",
+   "2": "grey",
+   "3": "tan",
+   "4": "grey-",
+   "5": "wood-",
+   "6": "brown",
+   "7": "straw",
+   "8": "black",
+   "9": "black-",
+   "10": "brown-",
+   "11": "tan-",
+   "12": "cream",
+   "13": "steel",
+   "14": "steel-",
+   "15": "red",
+   "16": "red-",
+   "17": "white",
+   "18": "hairBrown",
+   "19": "hairBrown-",
+   "20": "navy",
+   "21": "navy-",
+   "22": "yellow",
+   "23": "yellow-",
+   "24": "straw-",
+   "25": "orange",
+   "26": "white-",
+   "27": "blue",
+   "28": "blue-",
+   "29": "green",
+   "30": "green-",
+   "31": "pink-",
+   "32": "pink",
+   "33": "leaf",
+   "34": "leaf-",
+   "35": "cream-"
+  },
+  "images": {
+   "sprite-axe-0": {
+    "fps": 0,
+    "data": {
+     "name": "Flint hand axe",
+     "slot": "tool"
+    }
+   },
+   "sprite-axe-1": {
+    "fps": 0,
+    "data": {
+     "name": "Obsidian point axe",
+     "slot": "tool"
+    }
+   },
+   "sprite-axe-2": {
+    "fps": 0,
+    "data": {
+     "name": "River-stone chopper",
+     "slot": "tool"
+    }
+   },
+   "sprite-bandana-0": {
+    "fps": 0,
+    "data": {
+     "name": "Red headband bandana",
+     "slot": "hat"
+    }
+   },
+   "sprite-bandana-1": {
+    "fps": 0,
+    "data": {
+     "name": "Red head-wrap bandana",
+     "slot": "hat"
+    }
+   },
+   "sprite-bandana-2": {
+    "fps": 0,
+    "data": {
+     "name": "Spotted red bandana, long tails",
+     "slot": "hat"
+    }
+   },
+   "sprite-beard-0": {
+    "fps": 0,
+    "data": {
+     "name": "Castaway full beard",
+     "slot": "beard"
+    }
+   },
+   "sprite-beard-1": {
+    "fps": 0,
+    "data": {
+     "name": "Long chest-length castaway beard",
+     "slot": "beard"
+    }
+   },
+   "sprite-beard-2": {
+    "fps": 0,
+    "data": {
+     "name": "Wild bushy castaway beard",
+     "slot": "beard"
+    }
+   },
+   "sprite-cap-0": {
+    "fps": 0,
+    "data": {
+     "name": "Battered captain's cap",
+     "slot": "hat"
+    }
+   },
+   "sprite-cap-1": {
+    "fps": 0,
+    "data": {
+     "name": "Patched captain's cap with gold braid",
+     "slot": "hat"
+    }
+   },
+   "sprite-cap-2": {
+    "fps": 0,
+    "data": {
+     "name": "Salt-faded skipper's cap",
+     "slot": "hat"
+    }
+   },
+   "sprite-carried-0": {
+    "fps": 0,
+    "data": {
+     "name": "Small brown leather suitcase",
+     "slot": "tool"
+    }
+   },
+   "sprite-carried-1": {
+    "fps": 0,
+    "data": {
+     "name": "Closed black umbrella",
+     "slot": "tool"
+    }
+   },
+   "sprite-carried-2": {
+    "fps": 0,
+    "data": {
+     "name": "Brass lantern",
+     "slot": "tool"
+    }
+   },
+   "sprite-casual-0": {
+    "fps": 0,
+    "data": {
+     "name": "Sailor shirt",
+     "slot": "top"
+    }
+   },
+   "sprite-casual-1": {
+    "fps": 0,
+    "data": {
+     "name": "Green hoodie",
+     "slot": "top"
+    }
+   },
+   "sprite-casual-2": {
+    "fps": 0,
+    "data": {
+     "name": "Pink blouse",
+     "slot": "top"
+    }
+   },
+   "sprite-dresses-0": {
+    "fps": 0,
+    "data": {
+     "name": "Yellow summer dress",
+     "slot": "top"
+    }
+   },
+   "sprite-dresses-1": {
+    "fps": 0,
+    "data": {
+     "name": "Black evening dress",
+     "slot": "top"
+    }
+   },
+   "sprite-dresses-2": {
+    "fps": 0,
+    "data": {
+     "name": "Blue pinafore dress with white blouse",
+     "slot": "top"
+    }
+   },
+   "sprite-everyday-bottoms-0": {
+    "fps": 0,
+    "data": {
+     "name": "Blue jeans with brown belt",
+     "slot": "bottom"
+    }
+   },
+   "sprite-everyday-bottoms-1": {
+    "fps": 0,
+    "data": {
+     "name": "Grey suit trousers",
+     "slot": "bottom"
+    }
+   },
+   "sprite-everyday-bottoms-2": {
+    "fps": 0,
+    "data": {
+     "name": "Pleated red skirt",
+     "slot": "bottom"
+    }
+   },
+   "sprite-formal-0": {
+    "fps": 0,
+    "data": {
+     "name": "Dark business suit jacket",
+     "slot": "top"
+    }
+   },
+   "sprite-formal-1": {
+    "fps": 0,
+    "data": {
+     "name": "Navy ship officer's jacket",
+     "slot": "top"
+    }
+   },
+   "sprite-formal-2": {
+    "fps": 0,
+    "data": {
+     "name": "Cook's white double-breasted jacket",
+     "slot": "top"
+    }
+   },
+   "sprite-hat-0": {
+    "fps": 0,
+    "data": {
+     "name": "Classic straw sun hat",
+     "slot": "hat"
+    }
+   },
+   "sprite-hat-1": {
+    "fps": 0,
+    "data": {
+     "name": "Woven conical straw hat",
+     "slot": "hat"
+    }
+   },
+   "sprite-hat-2": {
+    "fps": 0,
+    "data": {
+     "name": "Frayed floppy straw hat",
+     "slot": "hat"
+    }
+   },
+   "sprite-leafskirt-0": {
+    "fps": 0,
+    "data": {
+     "name": "Palm leaf skirt",
+     "slot": "bottom"
+    }
+   },
+   "sprite-leafskirt-1": {
+    "fps": 0,
+    "data": {
+     "name": "Long palm frond skirt",
+     "slot": "bottom"
+    }
+   },
+   "sprite-leafskirt-2": {
+    "fps": 0,
+    "data": {
+     "name": "Short two-tier leaf skirt",
+     "slot": "bottom"
+    }
+   },
+   "sprite-rod-0": {
+    "fps": 0,
+    "data": {
+     "name": "Straw bamboo rod",
+     "slot": "tool"
+    }
+   },
+   "sprite-rod-1": {
+    "fps": 0,
+    "data": {
+     "name": "Green cane rod with float",
+     "slot": "tool"
+    }
+   },
+   "sprite-rod-2": {
+    "fps": 0,
+    "data": {
+     "name": "Old tan rod, line hooked back",
+     "slot": "tool"
+    }
+   },
+   "sprite-shirt-0": {
+    "fps": 0,
+    "data": {
+     "name": "Torn striped shirt",
+     "slot": "top"
+    }
+   },
+   "sprite-shirt-1": {
+    "fps": 0,
+    "data": {
+     "name": "Ragged cropped stripe shirt",
+     "slot": "top"
+    }
+   },
+   "sprite-shirt-2": {
+    "fps": 0,
+    "data": {
+     "name": "Long ripped sailor stripes",
+     "slot": "top"
+    }
+   },
+   "sprite-shorts-0": {
+    "fps": 0,
+    "data": {
+     "name": "Ragged blue cut-offs",
+     "slot": "bottom"
+    }
+   },
+   "sprite-shorts-1": {
+    "fps": 0,
+    "data": {
+     "name": "Patched cut-offs with rope belt",
+     "slot": "bottom"
+    }
+   },
+   "sprite-shorts-2": {
+    "fps": 0,
+    "data": {
+     "name": "Short cut-offs with white fray",
+     "slot": "bottom"
+    }
+   },
+   "sprite-spear-0": {
+    "fps": 0,
+    "data": {
+     "name": "Flint fishing spear",
+     "slot": "tool"
+    }
+   },
+   "sprite-spear-1": {
+    "fps": 0,
+    "data": {
+     "name": "Barbed stone fishing spear",
+     "slot": "tool"
+    }
+   },
+   "sprite-spear-2": {
+    "fps": 0,
+    "data": {
+     "name": "Red-bound slate spear",
+     "slot": "tool"
+    }
+   },
+   "sprite-vest-0": {
+    "fps": 0,
+    "data": {
+     "name": "Sailcloth vest, knotted tie",
+     "slot": "top"
+    }
+   },
+   "sprite-vest-1": {
+    "fps": 0,
+    "data": {
+     "name": "Long laced sailcloth vest",
+     "slot": "top"
+    }
+   },
+   "sprite-vest-2": {
+    "fps": 0,
+    "data": {
+     "name": "Ragged cropped sail vest",
+     "slot": "top"
+    }
+   }
+  }
+ }
+}

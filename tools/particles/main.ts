@@ -1,10 +1,11 @@
 // The particle editor: the particle systems assets carry (engine/world/particles.ts): the sparks a fire throws and the
 // glow halo round it, a lantern's light. Each is shown at work on a flame or a torch, by day and at night (then with its
-// halo), kept on this device and saved into the game's project (src/content/store/pixel-particles.json) for the game.
+// halo), changed in memory and saved into the game's project (src/content/particles.json) for the game.
 import '../props/style.css';
 import './style.css';
-import { canSaveToProject, saveStores, storeTracker } from '../../shared/project.ts';
-import { readStore, writeStore } from '../../shared/files.ts';
+import { canSaveToProject } from '../../shared/project.ts';
+import { contentTracker, readContent, saveContent } from '../../engine/core/content.ts';
+import { readLocal, writeLocal } from '../../shared/files.ts';
 import { currentLang } from '../../shared/lang.ts';
 import { h, history, nameTag, savePicture, snapButton, topBar, undoKeys, word } from '../../shared/shell.ts';
 import { choice, colorField, confirmDialog, field, fields, library, numberField, pixelButton, section, toggle, viewTools, workspace, type Library, type Option } from '../../ui/components.ts';
@@ -20,9 +21,9 @@ const L = (en: string, de: string) => (currentLang() === 'de' ? de : en);
 
 interface Prefs { id: string; on: PreviewOn; night: boolean; zoom: number }
 const PREFS_KEY = 'pixel-particles-tool';
-const prefs: Prefs = { id: 'sparks', on: 'flame', night: true, zoom: 4, ...readStore<Partial<Prefs>>(PREFS_KEY, {}) };
+const prefs: Prefs = { id: 'sparks', on: 'flame', night: true, zoom: 4, ...readLocal<Partial<Prefs>>(PREFS_KEY, {}) };
 if (!particleSystem(prefs.id)) prefs.id = particleSystems()[0].id;
-const savePrefs = () => writeStore(PREFS_KEY, prefs);
+const savePrefs = () => writeLocal(PREFS_KEY, prefs);
 const current = (): ParticleSystem => particleSystem(prefs.id) ?? particleSystems()[0];
 let message = '';
 
@@ -165,7 +166,7 @@ const ON: Option[] = [
 function renderBar(): void {
   const s = current();
   const builtIn = isBuiltIn(s.id);
-  const kept = (readStore<{ id?: string }[]>(PARTICLE_STORE, []) ?? []).some((o) => o?.id === s.id);
+  const kept = (readContent<{ id?: string }[]>(PARTICLE_STORE, []) ?? []).some((o) => o?.id === s.id);
   const { bar, undo: u, redo: r, pops } = topBar({
     sidebar: true,
     tool: 'particles',
@@ -176,19 +177,19 @@ function renderBar(): void {
         'Partikelsysteme für Assets: die Funken eines Feuers und der Lichtschein darum, das Licht einer Laterne. Ein Asset hängt eines an einen Punkt seines Bildes, über seine Kennung (`fx` eines Dings oder Werkzeugs).'),
       L('The preview shows it on a flame or a torch, at that point. At night the halo lights the ground; in a cave the reach in tiles is used instead.',
         'Die Vorschau zeigt es auf einer Flamme oder Fackel, an diesem Punkt. Nachts erhellt der Schein den Boden; in einer Höhle gilt stattdessen die Reichweite in Feldern.'),
-      L('Changes stay on this device until you save them to the project.', 'Änderungen bleiben auf diesem Gerät, bis du sie im Projekt speicherst.'),
+      L('Changes are kept only until you leave: save them to the project.', 'Änderungen bleiben nur bis zum Verlassen: speichere sie im Projekt.'),
     ],
     more: [
       { label: L('New system', 'Neues System'), icon: 'plus', run: () => add(BUILT_IN[0], L('Particles', 'Partikel')) },
       { label: L('Duplicate', 'Duplizieren'), icon: 'copy', run: () => add(s, `${s.name} 2`) },
-      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: storeTracker([PARTICLE_STORE]), run: () => void saveStores([PARTICLE_STORE]).then((ok) => {
-        message = ok ? L('Saved to the project (src/content/store); commit it to keep it.', 'Im Projekt gespeichert (src/content/store); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.');
+      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: contentTracker([PARTICLE_STORE]), run: () => void saveContent([PARTICLE_STORE]).then((ok) => {
+        message = ok ? L('Saved to the project (src/content); commit it to keep it.', 'Im Projekt gespeichert (src/content); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.');
         render();
       }) },
       {
         label: builtIn ? L('Back to the engine\'s', 'Zurück zur Engine-Fassung') : L('Delete', 'Löschen'), icon: builtIn ? 'reset' : 'trash', danger: !builtIn, disabled: builtIn && !kept,
         run: async () => {
-          if (!builtIn && !(await confirmDialog(L(`Delete "${s.name}" from this device? Assets that use "${s.id}" lose it.`, `„${s.name}“ von diesem Gerät löschen? Assets mit „${s.id}“ verlieren es.`)))) return;
+          if (!builtIn && !(await confirmDialog(L(`Delete "${s.name}" from the project? Assets that use "${s.id}" lose it.`, `„${s.name}“ aus dem Projekt löschen? Assets mit „${s.id}“ verlieren es.`)))) return;
           deleteSystem(s.id);
           pick(builtIn ? s.id : particleSystems()[0].id);
         },

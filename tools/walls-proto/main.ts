@@ -134,7 +134,7 @@ function nudgeToLand(): void {
 const walker = { x: 12.5, y: 12.5, facing: 0 as Facing, moving: false, run: false, since: 0 };
 const FIG_BOX_R = 0.04; // small, so that it stays clear of a wall's box whenever the padding is at least a little
 
-/** The default character and the ones saved in the wardrobe on this device. */
+/** The default character and the ones saved in the project's characters.json. */
 const people = (): Saved[] => [{ id: '', name: 'Default', state: defaultState() }, ...loadRoster()];
 let look: Look = lookOf(defaultState());
 const frames = new Map<string, Uint8ClampedArray>();

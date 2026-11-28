@@ -13,7 +13,8 @@ import { AUTHORED } from '../../engine/core/poses.ts';
 import { CHARACTER_ORIGIN as FEET, drawCharacter, SPRITE_H, SPRITE_W, type Sprite } from '../../engine/core/puppet.ts';
 import { cheer, h, history, pick, row, savePicture, section, segmented, snapButton, tabs, tabTools, topBar, undoKeys, word, type IconName, rangeInput } from '../../shared/shell.ts';
 import { currentLang } from '../../shared/lang.ts';
-import { canSaveToProject, saveStores, storeTracker } from '../../shared/project.ts';
+import { canSaveToProject } from '../../shared/project.ts';
+import { contentTracker, readContent, saveContent, writeContent } from '../../engine/core/content.ts';
 import { missingPlantNames, plantName, t, type Key } from './i18n.ts';
 
 // ------------------------------------------------------------------ state
@@ -56,7 +57,8 @@ interface State {
   custom: Record<string, string>;
 }
 
-const STORAGE_KEY = FLORA_STORE;
+/** The tool's preferences in the browser (what is picked and shown); its colours and recipes are the project's flora.json. */
+const STORAGE_KEY = 'island-flora-ui';
 function defaultState(): State {
   return {
     selected: FLORA.find((e) => e.category === 'palm')?.id ?? FLORA[0]?.id ?? '',
@@ -68,8 +70,8 @@ function defaultState(): State {
 function loadState(): State {
   const state = defaultState();
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as Partial<State> | null;
-    if (!saved) return state;
+    const content = readContent<Partial<Pick<State, 'colors' | 'custom'>> | null>(FLORA_STORE, null);
+    const saved = { ...(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as Partial<State> | null), colors: content?.colors, custom: content?.custom };
     if (plantById(saved.selected)) state.selected = saved.selected!;
     if (TABS.includes(saved.tab as Tab)) state.tab = saved.tab!;
     if (Number.isInteger(saved.seed) && saved.seed! >= 0 && saved.seed! < VARIANTS) state.seed = saved.seed!;
@@ -95,8 +97,10 @@ function loadState(): State {
 let state = loadState();
 let version = 0;
 function saveState(): void {
+  const { colors, custom, ...prefs } = state;
+  writeContent(FLORA_STORE, { colors, custom });
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
   } catch {
     // Private windows and embedded previews may refuse storage.
   }
@@ -396,8 +400,8 @@ function renderBar(): void {
       repaired: repaired ? t('foot.repaired', { n: repaired }) : '',
     }), t('foot.rules')],
     more: [
-      { label: currentLang() === 'de' ? 'Im Projekt speichern' : 'Save to project', icon: 'download', main: true, disabled: !canSaveToProject(), track: storeTracker([FLORA_STORE]), run: () => void saveStores([FLORA_STORE]).then((ok) => {
-        status.textContent = ok ? (currentLang() === 'de' ? 'Im Projekt gespeichert (src/content/store).' : 'Saved to the project (src/content/store).') : (currentLang() === 'de' ? 'Nichts gespeichert: ändere erst etwas.' : 'Nothing saved: change something first.');
+      { label: currentLang() === 'de' ? 'Im Projekt speichern' : 'Save to project', icon: 'download', main: true, disabled: !canSaveToProject(), track: contentTracker([FLORA_STORE]), run: () => void saveContent([FLORA_STORE]).then((ok) => {
+        status.textContent = ok ? (currentLang() === 'de' ? 'Im Projekt gespeichert (src/content).' : 'Saved to the project (src/content).') : (currentLang() === 'de' ? 'Nichts gespeichert: ändere erst etwas.' : 'Nothing saved: change something first.');
       }) },
       { label: currentLang() === 'de' ? 'Neu beginnen' : 'Start over', icon: 'reset', run: () => {
         state = defaultState();

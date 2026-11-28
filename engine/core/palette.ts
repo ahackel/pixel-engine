@@ -88,7 +88,8 @@ const mix = (a: number[], b: number[], t: number): number[] => a.map((v, i) => v
 const SHADOW_TINT = rgbOf('#74405f');
 const LIGHT_TINT = rgbOf('#fff2c2');
 
-function ramp(hex: string): Record<Tone, string> {
+/** A base colour's three tones by the ramp rule. */
+export function ramp(hex: string): Record<Tone, string> {
   const base = rgbOf(hex);
   return {
     base: hex,

@@ -1,12 +1,13 @@
 // Wardrobe parts polished by hand. Every item, whatever format the model wrote it in, ends as stamps
 // of palette cells (engine/core/puppet.ts `Item`): head, front and back, its own side views, a torso,
 // a held tool, the sleeve and trouser strips. The parts editor (tools/parts) paints over those
-// stamps; the edits are kept on this device per catalogue id and laid over the item when the
-// catalogue is built (catalog.ts), so the wardrobe, scenes and games here wear the polished part.
+// stamps; the edits are the project's `parts.json` per catalogue id, their pixels the `parts` sheet
+// (engine/core/content.ts), laid over the item when the catalogue is built (catalog.ts), so the
+// wardrobe, scenes and games wear the polished part.
 import { cleanArt, gridsOf, toArt, type Art, type Grid } from '../core/stamp.ts';
 import type { Cell } from '../core/palette.ts';
 import type { Item, Stamp } from '../core/puppet.ts';
-import { readStore, writeStore } from '../../shared/files.ts';
+import { readContent, writeContent } from '../core/content.ts';
 
 /** One paintable layer of an item: a stamp, or a limb strip shown as a column, or a single cell. */
 export interface Layer {
@@ -74,12 +75,12 @@ export const copyItem = (item: Item): Item => structuredClone(item);
 
 // ------------------------------------------------------------------ storage
 
-/** Edited parts on this device: per catalogue id, the layers painted over, as art. */
-export const PARTS_STORE = 'pixel-parts';
+/** Edited parts in the project: per catalogue id, the layers painted over, as art (`parts.json` and the `parts` sheet). */
+export const PARTS_FILE = 'parts.json';
 type Edits = Record<string, Record<string, Art>>;
 let edits: Edits = read();
 function read(): Edits {
-  const raw = readStore<any>(PARTS_STORE, null);
+  const raw = readContent<any>(PARTS_FILE, null);
   const out: Edits = {};
   for (const [id, layers] of Object.entries(raw && typeof raw === 'object' ? raw : {})) {
     const clean: Record<string, Art> = {};
@@ -95,7 +96,7 @@ export const reloadParts = () => { edits = read(); };
 export const isEdited = (id: string) => !!edits[id];
 
 /**
- * The item with this device's edits laid over it. A layer is only taken where the item has it and
+ * The item with the project's edits laid over it. A layer is only taken where the item has it and
  * the sizes agree, so an edit made against another version of the item cannot break it.
  */
 export function editedItem(id: string, item: Item): Item {
@@ -122,11 +123,11 @@ export function saveEdits(id: string, original: Item, edited: Item): boolean {
   }
   if (Object.keys(layers).length) edits[id] = layers;
   else delete edits[id];
-  return writeStore(PARTS_STORE, edits);
+  return writeContent(PARTS_FILE, edits);
 }
 export function dropEdits(id: string): boolean {
   delete edits[id];
-  return writeStore(PARTS_STORE, edits);
+  return writeContent(PARTS_FILE, edits);
 }
 
 const FILE_TYPE = 'pixel-part';
@@ -141,6 +142,6 @@ export function importPart(text: string): string {
     if (a) layers[key] = a;
   }
   edits[raw.id] = layers;
-  writeStore(PARTS_STORE, edits);
+  writeContent(PARTS_FILE, edits);
   return raw.id;
 }

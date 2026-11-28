@@ -1,7 +1,7 @@
 import './style.css';
 import { ANIMAL_H, ANIMAL_ORIGIN, ANIMAL_STORE, ANIMAL_W, CLIPS, drawAnimal, savedAnimals, type AnimalSprite, type ClipId } from '../engine/animals/animal.ts';
 import { loadRoster, lookOf, outfitLook, pickCharacter } from '../engine/character/character.ts';
-import { writeStore } from '../shared/files.ts';
+import { writeLocal } from '../shared/files.ts';
 import { presetById } from '../engine/animals/animal-presets.ts';
 import { drawObject, LOOP_FRAMES, LOOP_RATE, OBJECT_H, OBJECT_ORIGIN, OBJECT_STORE, OBJECT_W, savedProps, type ObjectSprite, type Turn } from '../engine/objects/object.ts';
 import { objectPresetById } from '../engine/objects/object-presets.ts';
@@ -19,6 +19,9 @@ import { createHeightMap } from '../engine/world/terrain.ts';
 import { BuildingView, edgeKey, emptyBuilding } from '../engine/world/building/building.ts';
 import { edgeKindOf, wallKinds } from '../engine/world/building/walls.ts';
 import { BUILT_IN, ParticlePreview, particleSystem } from '../engine/world/particles.ts';
+import { iconRows } from '../ui/icons.ts';
+import { PAINT } from '../ui/theme.ts';
+import { drawRows } from '../shared/pixel-ui.ts';
 
 // The start page of the published site: what the tools are, each with a small live picture
 // drawn by the same code as the tool itself.
@@ -32,6 +35,7 @@ const en = {
   'objects.short': 'Build furniture and cars.',
   'flora.short': 'Grow palms and cacti.',
   'scene.short': 'Shape an island.',
+  'images.short': 'Paint icons, items, clothes and faces.',
   'props.short': 'Find any prop, freeze it, polish its pixels.',
   'walls.short': 'Walls for huts, painted over by hand.',
   'particles.short': 'Sparks and the glow round a fire.',
@@ -53,6 +57,7 @@ const de: Record<Key, string> = {
   'objects.short': 'Baue Möbel und Autos.',
   'flora.short': 'Lass Palmen wachsen.',
   'scene.short': 'Forme eine Insel.',
+  'images.short': 'Male Symbole, Dinge, Kleidung und Gesichter.',
   'props.short': 'Finde jede Requisite, friere sie ein, poliere ihre Pixel.',
   'walls.short': 'Wände für Hütten, von Hand übermalt.',
   'particles.short': 'Funken und der Schein eines Feuers.',
@@ -234,6 +239,11 @@ const sparksPreview = new ParticlePreview(64, 48);
 const sparksCanvas = h('canvas', { class: 'tool__canvas', width: '64', height: '48' });
 const sparksAt = (ms: number) => sparksPreview.frame(particleSystem('campfire') ?? BUILT_IN[0], ms, { on: 'flame', night: true });
 
+/** A few of the icons, for the image editor's card. */
+const imagesCanvas = h('canvas', { class: 'tool__canvas', width: '64', height: '48' });
+['palm', 'camera', 'hammer', 'leaf', 'flag', 'brush', 'pickaxe', 'bucket', 'eye', 'pencil', 'home', 'pin'].forEach((name, i) =>
+  drawRows(imagesCanvas.getContext('2d')!, iconRows(name), 4 + (i % 4) * 15, 3 + Math.floor(i / 4) * 15, PAINT));
+
 function paint(canvas: HTMLCanvasElement, image: Pixels): void {
   canvas.getContext('2d')!.putImageData(new ImageData(image.data as Uint8ClampedArray<ArrayBuffer>, image.width, image.height), 0, 0);
 }
@@ -266,11 +276,11 @@ function madeThings(): Made[] {
   });
   const animals: Made[] = savedAnimals().slice(-SHOWN).map((s) => {
     const { sprite } = drawAnimal(s.animal, 'idle', 0, 0);
-    return { name: s.name, tool: 'animals', href: './tools/animals/', pick: () => writeStore(ANIMAL_STORE.current, s.id), picture: trimmed(sprite, ANIMAL_W, ANIMAL_H, THING_BOX) };
+    return { name: s.name, tool: 'animals', href: './tools/animals/', pick: () => writeLocal(ANIMAL_STORE.current, s.id), picture: trimmed(sprite, ANIMAL_W, ANIMAL_H, THING_BOX) };
   });
   const objects: Made[] = savedProps().slice(-SHOWN).map((s) => {
     const { sprite } = drawObject(s.prop, 0);
-    return { name: s.name, tool: 'objects', href: './tools/objects/', pick: () => writeStore(OBJECT_STORE.current, s.id), picture: trimmed(sprite, OBJECT_W, OBJECT_H, THING_BOX) };
+    return { name: s.name, tool: 'objects', href: './tools/objects/', pick: () => writeLocal(OBJECT_STORE.current, s.id), picture: trimmed(sprite, OBJECT_W, OBJECT_H, THING_BOX) };
   });
   const out: Made[] = [];
   for (let i = 1; out.length < SHOWN && i <= Math.max(people.length, animals.length, objects.length); i++) {
@@ -323,6 +333,7 @@ function mount(): void {
           card('walls', './tools/walls/', wallsCanvas, 'cast'),
           card('particles', './tools/particles/', sparksCanvas, 'cast'),
           card('scene', './tools/scene/', sceneCanvas, 'island'),
+          card('images', './tools/images/', imagesCanvas, 'cast'),
         ),
         h('section', { class: 'mine', 'aria-label': t('things') },
           h('div', { class: 'mine__head' }, h('h2', {}, t('things')), h('p', {}, t('things.note'))),

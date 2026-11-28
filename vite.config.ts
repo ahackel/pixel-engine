@@ -1,12 +1,13 @@
 import { defineConfig } from 'vite';
 import { contentSave } from './dev/content-plugin.ts';
+import { sheets } from './dev/sheet-plugin.ts';
 
 // Relative base so the built site works from any path (static hosting, file previews).
 // `vite build` builds the published site (andreashackel.de/pixel-art/): the start page and the tools
 // in `tools/`: wardrobe, parts editor, animal editor, props tool, object editor, flora tool, wall editor, particle editor and scene editor.
 export default defineConfig({
   base: './',
-  plugins: [contentSave({ dir: 'engine/character' })],
+  plugins: [sheets(), contentSave({ dir: 'engine/character' })],
   build: {
     outDir: 'dist',
     chunkSizeWarningLimit: 900,
@@ -22,7 +23,7 @@ export default defineConfig({
         walls: 'tools/walls/index.html',
         particles: 'tools/particles/index.html',
         parts: 'tools/parts/index.html',
-        icons: 'tools/icons/index.html',
+        images: 'tools/images/index.html',
         ui: 'tools/ui/index.html',
       },
     },

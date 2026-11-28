@@ -1,45 +1,29 @@
-// Small browser helpers shared by the editors: ids, what is kept on this device, saving text as a file, reading a picked file.
+// Small browser helpers shared by the editors: ids, preferences kept in the browser, saving text as a file, reading a picked file.
 
 export const newId = () => Math.random().toString(36).slice(2, 10);
 
-/** What the game's project holds for each store, saved from an editor with "Save to project" (`src/content/store/<key>.json`). */
-const project: Record<string, unknown> = {};
-try {
-  for (const [file, value] of Object.entries(import.meta.glob('/src/content/store/*.json', { eager: true, import: 'default' }))) project[file.slice(file.lastIndexOf('/') + 1, -5)] = value;
-} catch {
-  // Plain Node has no import.meta.glob; scripts then see no project files.
-}
-
-/** The project's value for a store key, for the few readers that keep their own storage. */
-export const projectStore = <T>(key: string): T | undefined => project[key] as T | undefined;
-
-/** A value kept on this device as JSON, else the project's saved one, else the fallback (also when the browser has no storage here). */
-export function readStore<T>(key: string, fallback: T): T {
+/**
+ * A value kept in this browser as JSON, else the fallback (also when the browser has no storage here). Only for a user's
+ * preferences (a tool's zoom, tab, what was picked) and a player's saved game: what editors make is project content
+ * (engine/core/content.ts), never kept on the device.
+ */
+export function readLocal<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key);
-    return raw === null ? (key in project ? (project[key] as T) : fallback) : JSON.parse(raw);
+    return raw === null ? fallback : JSON.parse(raw);
   } catch {
     return fallback;
   }
 }
 
-/** Keeps a value on this device. False when the browser refuses storage, so the caller can say the save did not happen. */
-export function writeStore(key: string, value: unknown): boolean {
+/** Keeps a preference in this browser. False when the browser refuses storage. */
+export function writeLocal(key: string, value: unknown): boolean {
   try {
     localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch {
     return false;
   }
-}
-
-/** The named things a tool keeps in its My things: a list of `{ id, name, [field] }`, each value checked by `clean`. */
-export function savedList<K extends string, T>(key: string, field: K, clean: (raw: unknown) => T): ({ id: string; name: string } & Record<K, T>)[] {
-  const list = readStore<unknown>(key, []);
-  if (!Array.isArray(list)) return [];
-  return list
-    .filter((s) => s && typeof s.id === 'string' && typeof s.name === 'string')
-    .map((s) => ({ id: s.id, name: s.name.slice(0, 40), [field]: clean(s[field]) }) as { id: string; name: string } & Record<K, T>);
 }
 
 /** Lets the browser save some text as a file. */

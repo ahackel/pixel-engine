@@ -1,5 +1,6 @@
 import { BEARD_STYLES, beardFromBehind, catalogHairViews, stubbled, tidyBeard } from './base.ts';
 import { compile } from './items.ts';
+import { spriteInput, WEAR } from './wear-sheet.ts';
 import shellFile from './data/shell-hair.json' with { type: 'json' };
 import { JOB_ITEMS } from './jobs.ts';
 import { editedItem } from './parts.ts';
@@ -22,7 +23,20 @@ export interface Entry {
   original?: Item;
 }
 
-const files = import.meta.glob<unknown[]>('./data/{sprite,recipe}-*.json', { eager: true, import: 'default' });
+const recipeFiles = import.meta.glob<unknown[]>('./data/recipe-*.json', { eager: true, import: 'default' });
+
+/** The item files as the model wrote them, in order: the recipe answers, then the sprite items of the wear sheet by set. */
+function files(): [string, unknown[]][] {
+  const sprites = new Map<string, unknown[]>();
+  const order = Object.keys(WEAR.images).map((name) => name.match(/^sprite-(.+)-(\d+)$/)).filter((m): m is RegExpMatchArray => !!m)
+    .sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : +a[2] - +b[2]));
+  for (const m of order) {
+    const list = sprites.get(m[1]) ?? [];
+    list[+m[2]] = spriteInput(WEAR.images[m[0]]);
+    sprites.set(m[1], list);
+  }
+  return [...Object.entries(recipeFiles), ...[...sprites].map(([set, list]) => [`./data/sprite-${set}.json`, list] as [string, unknown[]])];
+}
 
 // Sets left out of the wardrobe, with the reason. Everything else is included as returned.
 const EXCLUDED: Record<string, string> = {
@@ -99,10 +113,11 @@ export function recolor(item: Item, swap: Partial<Record<PaletteKey, PaletteKey>
 
 function build(): Entry[] {
   const entries: Entry[] = [];
-  for (const [path, list] of Object.entries(files)) {
+  for (const [path, list] of files()) {
     const [, format, set] = path.match(/(sprite|recipe)-([\w-]+)\.json$/)!;
     if (EXCLUDED[`${format}-${set}`]) continue;
     list.forEach((raw, index) => {
+      if (!raw) return;
       if (SUPERSEDED[`${format}-${set}-${index}`]) return;
       const result = compile(format as 'sprite' | 'recipe', raw);
       if (!result.ok) return;
@@ -147,7 +162,7 @@ function build(): Entry[] {
   for (const style of BEARD_STYLES) {
     entries.push({ id: `base-beard-${style.id}`, label: style.label, slot: 'beard', format: 'paint', island: false, item: style.item, colors: colorsOf(style.item) });
   }
-  // Parts polished by hand in the parts editor, on this device, laid over what the rules made.
+  // Parts polished by hand in the parts editor (the project's parts.json), laid over what the rules made.
   for (const entry of entries) {
     const item = editedItem(entry.id, entry.item);
     if (item !== entry.item) Object.assign(entry, { item, original: entry.item, colors: colorsOf(item) });

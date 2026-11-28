@@ -1,6 +1,6 @@
 // Props: anything standing in the world that is not terrain and not a character (docs/props.md).
 // One definition, `PropKind`, over the catalogues that already exist (flora recipes, object presets
-// and saved objects, decorations, the carried crate) and the kinds made on this device. A kind says
+// and saved objects, decorations, the carried crate) and the kinds made in the project. A kind says
 // how its pixels are made (`source`), which of the eight directions show which view (`views`) and
 // which features it opts into, whatever box it came from.
 //
@@ -16,7 +16,8 @@ import { OBJECT_PRESETS } from '../objects/object-presets.ts';
 import { cellForHex, cleanArt, freeze, paintedView, swayed, toArt, type Art, type Drawn, type Grid, type Painted } from '../core/stamp.ts';
 import { DECOR } from './decor.ts';
 import { cached, forget, idOf } from '../core/cache.ts';
-import { newId, readStore, writeStore } from '../../shared/files.ts';
+import { newId } from '../../shared/files.ts';
+import { readContent, writeContent } from '../core/content.ts';
 
 export type Source = 'painted' | 'grown' | 'built' | 'rigged';
 export const SOURCES: Source[] = ['painted', 'grown', 'built'];
@@ -55,7 +56,7 @@ export interface PropKind {
   locked?: boolean;
   /** For a painted kind made by freezing another one: that kind's id. */
   from?: string;
-  /** For a grown kind of this device: its recipe as written. */
+  /** For a grown kind of the project: its recipe as written. */
   recipe?: unknown;
 }
 
@@ -92,8 +93,8 @@ export const dirOfView = (count: ViewCount, view: number) => (view * 8) / count;
 
 // ------------------------------------------------------------------ storage
 
-/** Where props made, duplicated, hidden or locked on this device are kept. The scene editor and games read it too. */
-export const PROP_STORE = 'pixel-props';
+/** Where props made, duplicated, hidden or locked are kept: the project's props.json, their painted pixels the props sheet. The scene editor and games read it too. */
+export const PROPS_FILE = 'props.json';
 interface Mine {
   id: string; name: string; source: 'painted' | 'grown' | 'built'; tags: string[]; features: Feature[];
   views: ViewCount; mirror: boolean; flex: number; art?: Art; recipe?: unknown; build?: Build; from?: string;
@@ -107,7 +108,7 @@ const flexOf = (v: unknown): number | undefined => (typeof v === 'number' && Num
 const tagsOf = (v: unknown): string[] | undefined => (Array.isArray(v) ? v.filter((t): t is string => typeof t === 'string').map((t) => t.slice(0, 24)).slice(0, 12) : undefined);
 const nameOf = (v: unknown, fallback: string) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, 40) : fallback);
 
-/** A kind of this device as read from storage or a file; null when it cannot be used. */
+/** A kind of the project as read from storage or a file; null when it cannot be used. */
 function cleanMine(raw: any): Mine | null {
   if (!raw || typeof raw !== 'object') return null;
   const source = (['painted', 'grown', 'built'] as const).find((s) => s === raw.source);
@@ -138,7 +139,7 @@ function cleanOver(raw: any): Over {
   return out;
 }
 function readProps(): Store {
-  const raw = readStore<any>(PROP_STORE, null);
+  const raw = readContent<any>(PROPS_FILE, null);
   const mine = (Array.isArray(raw?.mine) ? raw.mine : []).map(cleanMine).filter((m: Mine | null): m is Mine => !!m);
   const over: Record<string, Over> = {};
   for (const [id, o] of Object.entries(raw?.over ?? {})) over[id] = cleanOver(o);
@@ -149,10 +150,10 @@ let kinds: PropKind[] | null = null;
 /** Kinds and locks a scene brought with it from another device, kept for this visit only. */
 const visiting: Store = { mine: [], over: {} };
 
-/** Writes the store back and forgets the kinds made from it. False when the browser refuses storage. */
+/** Writes the store back (in memory, until saved to the project) and forgets the kinds made from it. */
 function save(): boolean {
   kinds = null;
-  return writeStore(PROP_STORE, store);
+  return writeContent(PROPS_FILE, store);
 }
 /** Reads storage again, after another page changed it. */
 export function reloadProps(): void {
@@ -203,7 +204,7 @@ function catalogue(): PropKind[] {
   return out;
 }
 
-/** Every kind: the catalogue with this device's changes, then the kinds made here. Hidden ones included; see `hidden`. */
+/** Every kind: the catalogue with the project's changes, then the kinds made here. Hidden ones included; see `hidden`. */
 export function propKinds(): PropKind[] {
   if (kinds) return kinds;
   const list = catalogue().map((k): PropKind => {
@@ -230,7 +231,7 @@ export const isHidden = (id: string) => store.over[id]?.hidden === true;
 
 // ------------------------------------------------------------------ changing kinds
 
-/** Changes a kind: a catalogue kind keeps the change as an override, a kind of this device in itself. */
+/** Changes a kind: a catalogue kind keeps the change as an override, a kind of the project in itself. */
 export function changeKind(id: string, change: Partial<Pick<PropKind, 'name' | 'features' | 'views' | 'mirror' | 'flex' | 'tags' | 'art' | 'build' | 'recipe'>>): boolean {
   const mine = store.mine.find((m) => m.id === id);
   if (mine) {
@@ -258,7 +259,7 @@ export function deleteKind(id: string): boolean {
   return save();
 }
 
-/** A new kind of this device: painted from a blank canvas, a copy of another kind, or its frozen views. Gives its id. */
+/** A new kind of the project: painted from a blank canvas, a copy of another kind, or its frozen views. Gives its id. */
 export function addKind(kind: Omit<Mine, 'id'>): string {
   const id = `mine:${newId()}`;
   store.mine.push({ ...structuredClone(kind), id });
@@ -266,7 +267,7 @@ export function addKind(kind: Omit<Mine, 'id'>): string {
   return id;
 }
 
-/** A copy of a kind as a kind of this device, with the same source. Gives the new id. */
+/** A copy of a kind as a kind of the project, with the same source. Gives the new id. */
 export function duplicateKind(k: PropKind, name = `${k.name} 2`): string {
   const source = k.source === 'rigged' ? 'painted' : k.source;
   const recipe = k.source === 'grown' ? (k.recipe ?? plantById(k.id)?.raw) : undefined;
@@ -292,7 +293,7 @@ export function generatedViews(k: PropKind): Drawn[] {
 
 /**
  * Freezes a kind. A catalogue kind is locked: its views are kept as art and drawn from then on.
- * A kind of this device becomes painted. Either way, gives the art to polish.
+ * A kind of the project becomes painted. Either way, gives the art to polish.
  */
 export function lockKind(k: PropKind): Art {
   const art = freeze(generatedViews(k));
@@ -309,7 +310,7 @@ export function unlockKind(id: string): boolean {
   return save();
 }
 
-/** A painted file: one kind of this device, for export and import. */
+/** A painted file: one kind of the project, for export and import. */
 const FILE_TYPE = 'pixel-prop';
 export function propKindFile(k: PropKind): string {
   const m = store.mine.find((x) => x.id === k.id);
@@ -414,7 +415,7 @@ export function lockedPicture(id: string, dir: number, frame = 0, wind = 1): Pai
 // ------------------------------------------------------------------ carried in scenes
 
 /**
- * What a scene needs of this device's props to be drawn elsewhere (in a game, or on another
+ * What a scene needs of the project's props to be drawn elsewhere (in a game, or on another
  * device): the kinds made here that it places, and the locked art of catalogue kinds it uses.
  */
 export interface Carried { kinds: unknown[]; locks: Record<string, Art> }

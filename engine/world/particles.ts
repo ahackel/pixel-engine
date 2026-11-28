@@ -1,10 +1,10 @@
 // Particle systems: a few pixels thrown from a point of a thing (sparks off a fire, embers, motes), and the glow halo
 // round that point. A system is plain data, edited in tools/particles and kept in the `pixel-particles` store (with a
-// game's `src/content/store/pixel-particles.json` behind it); an asset attaches one at a point of its picture
+// game's `src/content/particles.json` behind it); an asset attaches one at a point of its picture
 // (`Thing.fx`, a tool item's `fx`). Particles live in ground pixels and are worked out from their age, so nothing is
 // stepped, and they are drawn over the finished, lit picture, so they shine in the dark.
 import { PALETTE, PALETTE_KEYS, type PaletteKey, type Tone } from '../core/palette.ts';
-import { readStore, writeStore } from '../../shared/files.ts';
+import { readContent, writeContent } from '../core/content.ts';
 import { GLOW_ALPHA, GLOWING, light, TINTS, type Lamp } from './daylight.ts';
 import { FLAME_COLORS, FLAME_GLOW, FLAMES, flameFrame, flicker, TORCH } from './flame.ts';
 import { footOf, type Thing } from './island.ts';
@@ -43,7 +43,7 @@ export interface ParticleSystem {
   halo: { r: number; tiles: number; amount: number; flicker: boolean; color?: Paint } | null;
 }
 
-export const PARTICLE_STORE = 'pixel-particles';
+export const PARTICLE_STORE = 'particles.json';
 
 const fire = (tone: Tone = 'base'): Paint[] => (['blaze', 'flare', 'flame'] as const).map((key) => ({ key, tone }));
 /** The engine's own systems, there in every game; a game's store adds to them and may change them. */
@@ -85,7 +85,7 @@ export function cleanSystem(v: any): ParticleSystem | null {
 let stored: ParticleSystem[] | null = null;
 /** The systems this game has: its store's, then the built-in ones it does not change. */
 export function particleSystems(): ParticleSystem[] {
-  stored ??= (readStore<unknown[]>(PARTICLE_STORE, []) ?? []).map(cleanSystem).filter((s): s is ParticleSystem => !!s);
+  stored ??= (readContent<unknown[]>(PARTICLE_STORE, []) ?? []).map(cleanSystem).filter((s): s is ParticleSystem => !!s);
   return [...stored, ...BUILT_IN.filter((b) => !stored!.some((s) => s.id === b.id))];
 }
 const byId = new Map<string, ParticleSystem | null>();
@@ -94,7 +94,7 @@ export function particleSystem(id: string): ParticleSystem | null {
   return byId.get(id)!;
 }
 export const isBuiltIn = (id: string) => BUILT_IN.some((b) => b.id === id);
-/** Keeps a system in the store on this device (a built-in one so kept changes it). Whether storage took it. */
+/** Keeps a system in the project's particles.json (a built-in one so kept changes it), in memory until saved. */
 export function saveSystem(system: ParticleSystem): boolean {
   particleSystems();
   const list = [...stored!];
@@ -109,7 +109,7 @@ export function deleteSystem(id: string): boolean {
 function keep(list: ParticleSystem[]): boolean {
   stored = list;
   byId.clear();
-  return writeStore(PARTICLE_STORE, list);
+  return writeContent(PARTICLE_STORE, list);
 }
 /** Reads the store again, after another page (another editor tab) may have changed it. */
 export function reloadSystems(): void {

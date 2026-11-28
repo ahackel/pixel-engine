@@ -1,16 +1,22 @@
-// The shared icon library: 9 by 9 pictures written as rows (see PAINT in theme.ts), drawn and edited in the icon editor
-// (tools/icons). `icons.json` here is the engine's set; a game's `src/content/icons.json` adds to it and overrides by name.
-import base from './icons.json';
+// The shared icon library: the 9 by 9 pictures of the `icons` sheet (ui/images/icons.png, in the editor palette), drawn
+// and edited in the image editor (tools/images). A game's own `icons` sheet (src/content/images/) adds to it and
+// overrides by name. `ICONS` gives them as rows of letters (PAINT_LETTERS in theme.ts), which `drawRows` paints.
+import engineIcons from './images/icons.png?sheet';
+import { names, setEditorColors, sheet } from '../engine/core/images.ts';
+import { EDITOR_COLORS, PAINT_LETTERS } from './theme.ts';
 
-const project: Record<string, string[]> = {};
-try {
-  for (const file of Object.values(import.meta.glob('/src/content/icons.json', { eager: true, import: 'default' }))) Object.assign(project, file);
-} catch { /* plain Node has no import.meta.glob */ }
+setEditorColors(EDITOR_COLORS);
+const LETTER = Object.fromEntries(Object.entries(PAINT_LETTERS).map(([ch, name]) => [name, ch]));
 
-/** Every icon by name: the engine's, then the game's laid over. */
-export const ICONS: Readonly<Record<string, readonly string[]>> = { ...base, ...project };
-/** The names the engine itself ships; code can rely on these. */
-export type Icon = keyof typeof base;
+/** The icons sheet: the engine's, the game's laid over. */
+export const iconSheet = () => sheet('icons', engineIcons);
+
+/** Every icon by name as letter rows: the engine's, then the game's laid over. */
+export const ICONS: Readonly<Record<string, readonly string[]>> = Object.fromEntries(
+  Object.values(iconSheet().images).map((img) => [img.name, names(img).map((row) => row.map((n) => (n && LETTER[n]) || '.').join(''))]),
+);
+/** An icon's name. */
+export type Icon = string;
 
 /** An icon's rows; the question-mark box for a name that is not there. */
 export const iconRows = (name: string): readonly string[] => ICONS[name] ?? ICONS.missing;

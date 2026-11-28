@@ -5,8 +5,4 @@
 .wardrobe { position: absolute; inset: 0; background: #8cc3c9; --gap: 12px; overflow: hidden; }
 .wardrobe .editor { overflow-y: auto; }
 /* While the shapes are drawn the choices step aside for them, beside the preview. */
-.wardrobe .wardrobe__shapes { display: none; }
-.wardrobe--shapes .editor { right: var(--shapes-w, 50%); }
-.wardrobe--shapes .editor .editor__side, .wardrobe--shapes .editor .editor__end { display: none; }
-.wardrobe--shapes .wardrobe__shapes { display: flex; position: absolute; top: 0; right: 0; bottom: 0; max-width: 80%; }
 .wardrobe .editor { background: none; }

@@ -1,5 +1,5 @@
 import { recolorPlant, tryPlant, type Category, type Plant } from './flora.ts';
-import { readStore } from '../../shared/files.ts';
+import { readContent } from '../core/content.ts';
 import { PALETTE, type PaletteKey } from '../core/palette.ts';
 
 /** One plant as the model wrote it, compiled. */
@@ -44,20 +44,20 @@ export const FLORA_CALLS = built.calls;
 export const plantById = (id: string | null | undefined) => FLORA.find((e) => e.id === id);
 
 /**
- * Where the flora tool keeps its work on this device. Its `custom` (per plant, the recipe as edited
- * there, as text) and `colors` (per plant, a colour swap) are read by the scene editor too, so a
- * plant looks the same in both.
+ * Where the flora tool keeps its work: the project's flora.json. Its `custom` (per plant, the recipe
+ * as edited there, as text) and `colors` (per plant, a colour swap) are read by the scene editor and
+ * games too, so a plant looks the same everywhere.
  */
-export const FLORA_STORE = 'island-flora';
+export const FLORA_STORE = 'flora.json';
 /** A colour swap from storage: which of a plant's own colours is replaced by which. Anything that is not a palette colour is left out. */
 export const cleanSwap = (swap: unknown): Partial<Record<PaletteKey, PaletteKey>> =>
   Object.fromEntries(Object.entries(swap ?? {}).filter(([from, to]) => from in PALETTE && to && (to as string) in PALETTE));
 
 /**
  * Plants as the flora tool shows them: a recipe edited there, and colours swapped there, are kept
- * in that tool's storage and used here too. Read once per page load.
+ * in the project's flora.json and used here too. Read once per page load.
  */
-const floraEdits = readStore<{ custom?: Record<string, unknown>; colors?: Record<string, unknown> } | null>(FLORA_STORE, null);
+const floraEdits = readContent<{ custom?: Record<string, unknown>; colors?: Record<string, unknown> } | null>(FLORA_STORE, null);
 const plantCache = new Map<string, Plant>();
 export function plantOf(entry: PlantEntry): Plant {
   let plant = plantCache.get(entry.id);

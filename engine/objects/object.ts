@@ -3,7 +3,7 @@
 // 2:1 view, lit with the flora light as the animals are, in all four camera turns.
 import { PAINT_KEYS, PALETTE, type PaletteKey, type Tone } from '../core/palette.ts';
 import { cellHash } from '../../shared/random.ts';
-import { savedList } from '../../shared/files.ts';
+import { contentList } from '../core/content.ts';
 
 
 export const SHAPES = ['box', 'cylinder', 'ball'] as const;
@@ -315,10 +315,10 @@ export function heightOf(prop: Build): number {
 
 // ------------------------------------------------------------------ files
 
-/** Where the object editor keeps its work on this device: the object being worked on, My things, and which of them is picked. */
-export const OBJECT_STORE = { draft: 'pixel-object-draft', roster: 'pixel-objects', current: 'pixel-objects-current' } as const;
+/** Where the saved objects are (the project's objects.json), and the preference of which one the editor opens on. */
+export const OBJECT_STORE = { roster: 'objects.json', current: 'pixel-objects-current' } as const;
 /** The objects in My things. */
-export const savedProps = () => savedList(OBJECT_STORE.roster, 'prop', cleanBuild);
+export const savedProps = () => contentList(OBJECT_STORE.roster, 'prop', cleanBuild);
 
 const FILE_TYPE = 'pixel-object';
 export const propFile = (name: string, prop: Build) => JSON.stringify({ type: FILE_TYPE, version: 1, name, object: prop }, null, 2);

@@ -1,6 +1,6 @@
 // A character as the wardrobe builds it, shared by the wardrobe and the scene editor: the
 // choices a player makes, how they are checked when read back, how they turn into a look the
-// puppet draws, and the list of characters saved on this device.
+// puppet draws, and the list of characters saved in the project (characters.json).
 import {
   baseLook, beardFor, BROWS, DEFAULT_FACE, EYE_COLORS, EYE_SHAPES, facesFor, GLASSES_COLORS, viewsFor, HAIR_STYLES, HEAD_SHAPES, headFor, headItemFor, MOODS, NOSES, UNDERSHORTS, UNDERTOP, wear,
   type FaceOptions, type Mood,
@@ -8,7 +8,8 @@ import {
 import { CATALOG, entryById, recolor, type Entry } from './catalog.ts';
 import { HAIR_KEYS, PALETTE, SKIN_KEYS, type PaletteKey } from '../core/palette.ts';
 import { BUILDS, type Item, type Look, type Slot } from '../core/puppet.ts';
-import { newId, projectStore } from '../../shared/files.ts';
+import { newId } from '../../shared/files.ts';
+import { readContent, writeContent } from '../core/content.ts';
 import { BONE, boneHead, PELVIS, RIBS, skullFaces } from './skeleton.ts';
 import { WEAR_MAX, weathered, type Wear } from './wear.ts';
 
@@ -186,9 +187,8 @@ export function lookOf(source: State, underwear = true): Look {
 
 export interface Saved { id: string; name: string; state: State }
 
-export const ROSTER_KEY = 'castaway-characters';
-/** The wardrobe's working character from before characters had names. */
-const DRAFT_KEY = 'castaway-wardrobe';
+/** The saved characters: the project's characters.json. */
+export const ROSTER_KEY = 'characters.json';
 const FILE_TYPE = 'castaway-character';
 
 
@@ -211,36 +211,18 @@ export function pickCharacter(id: string | null): void {
   }
 }
 
-/** Characters saved on this device. The first time, the wardrobe's working character becomes the first one. */
+/** The characters saved in the project (characters.json; the changes of this visit, saved or not). */
 export function loadRoster(): Saved[] {
-  try {
-    const raw = localStorage.getItem(ROSTER_KEY) ?? (projectStore(ROSTER_KEY) === undefined ? null : JSON.stringify(projectStore(ROSTER_KEY)));
-    if (raw === null) {
-      const draft = localStorage.getItem(DRAFT_KEY);
-      if (!draft) return [];
-      // Stored right away, so every page sees the same id for it.
-      const first = [{ id: newId(), name: 'Castaway', state: cleanState(JSON.parse(draft)) }];
-      saveRoster(first);
-      return first;
-    }
-    const list = JSON.parse(raw);
-    if (!Array.isArray(list)) return [];
-    return list
-      .filter((c) => c && typeof c.name === 'string' && typeof c.id === 'string')
-      .map((c) => ({ id: c.id, name: c.name.slice(0, 40), state: cleanState(c.state) }));
-  } catch {
-    return [];
-  }
+  const list = readContent<unknown>(ROSTER_KEY, []);
+  if (!Array.isArray(list)) return [];
+  return list
+    .filter((c) => c && typeof c.name === 'string' && typeof c.id === 'string')
+    .map((c) => ({ id: c.id, name: c.name.slice(0, 40), state: cleanState(c.state) }));
 }
 
-/** False when the browser refuses storage, so the caller can say the save did not happen. */
+/** Changes the saved characters (in memory until saved to the project). */
 export function saveRoster(list: Saved[]): boolean {
-  try {
-    localStorage.setItem(ROSTER_KEY, JSON.stringify(list));
-    return true;
-  } catch {
-    return false;
-  }
+  return writeContent(ROSTER_KEY, list);
 }
 
 export const characterFile = (c: Saved) => JSON.stringify({ type: FILE_TYPE, version: 1, name: c.name, state: c.state }, null, 2);

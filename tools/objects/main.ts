@@ -1,14 +1,15 @@
 // The object editor: pick a thing, then change its size, parts and colours, see it in all four
-// camera turns, and keep a named list on the device. Points for the game sit behind Expert tools.
+// camera turns, and keep a named list in the project (src/content/objects.json). Points for the game sit behind Expert tools.
 // Built on the shared editor shell, like the wardrobe.
 import { choice, tileGrid, confirmDialog, library, toggle as pixelToggle, turnView, viewTools, workspace, type Library } from '../../ui/components.ts';
-import { canSaveToProject, saveStores, storeTracker } from '../../shared/project.ts';
+import { canSaveToProject } from '../../shared/project.ts';
+import { contentTracker, saveContent, writeContent } from '../../engine/core/content.ts';
 import {
   COLOR_KEYS, cleanBuild, DEFAULT_BUILD, drawObject, framesOf, heightOf, LOOP_RATE, ObjectSprite, OBJECT_H, OBJECT_ORIGIN, OBJECT_STORE, OBJECT_W, propFile, readPropFile, savedProps, type ObjectFrame, type Build, type Turn,
 } from '../../engine/objects/object.ts';
 import { OBJECT_PRESETS } from '../../engine/objects/object-presets.ts';
 import { buildPanel, type BuildContext } from './build-panel.ts';
-import { download, newId, pickFile, readStore, writeStore } from '../../shared/files.ts';
+import { download, newId, pickFile, readLocal, writeLocal } from '../../shared/files.ts';
 import { type PaletteKey } from '../../engine/core/palette.ts';
 import {
   cheer, h, history, NAMES, nameTag, pick, pickStart, savePicture, section, shuffled, snapButton, tabs, tabTools, topBar, undoKeys, word,
@@ -21,19 +22,19 @@ const L = (en: string, german: string) => (currentLang() === 'de' ? german : en)
 
 // ------------------------------------------------------------------ state
 
-const { draft: DRAFT_KEY, roster: ROSTER_KEY, current: CURRENT_KEY } = OBJECT_STORE;
+const { roster: ROSTER_KEY, current: CURRENT_KEY } = OBJECT_STORE;
 interface Saved { id: string; name: string; prop: Build }
 
-let prop = cleanBuild(readStore(DRAFT_KEY, OBJECT_PRESETS[0].prop));
+let prop = cleanBuild(OBJECT_PRESETS[0].prop);
 let roster: Saved[] = savedProps();
-let currentId: string | null = readStore<string | null>(CURRENT_KEY, null);
+let currentId: string | null = readLocal<string | null>(CURRENT_KEY, null);
 if (!roster.some((s) => s.id === currentId)) currentId = null;
 
 const current = () => roster.find((s) => s.id === currentId);
 // Opening the editor shows the object picked in My things, even if the draft moved on.
 if (current()) prop = structuredClone(current()!.prop);
 const EXPERT_KEY = 'pixel-objects-expert';
-let expert = readStore<boolean>(EXPERT_KEY, false) === true;
+let expert = readLocal<boolean>(EXPERT_KEY, false) === true;
 
 type TabId = 'things' | 'size' | 'parts' | 'points';
 const TABS: [TabId, string, string, IconName][] = [['things', 'Things', 'Dinge', 'armchair'], ['size', 'Size', 'Größe', 'box'], ['parts', 'Parts', 'Teile', 'shapes'], ['points', 'Points', 'Punkte', 'pin']];
@@ -79,13 +80,13 @@ const undo = history(() => prop, (value) => {
 });
 
 function storeRoster(note = ''): void {
-  message = writeStore(ROSTER_KEY, roster) ? note : L('Could not save: this browser refuses storage here.', 'Nicht gespeichert: Dieser Browser erlaubt hier keinen Speicher.');
+  writeContent(ROSTER_KEY, roster);
+  message = note;
 }
 
 /** Keeps the draft and, if one is picked, its entry in My things. */
 function persist(): void {
   version++;
-  writeStore(DRAFT_KEY, prop);
   selected = Math.max(0, Math.min(selected, prop.parts.length - 1));
   const saved = current();
   if (saved) {
@@ -104,7 +105,7 @@ function changed(): void {
 }
 function setCurrent(id: string | null): void {
   currentId = id;
-  writeStore(CURRENT_KEY, id);
+  writeLocal(CURRENT_KEY, id);
 }
 function addThing(name: string, from: Build): void {
   const saved = { id: newId(), name: name.slice(0, 40), prop: structuredClone(from) };
@@ -132,7 +133,7 @@ function renameThing(name: string): void {
 }
 async function remove(): Promise<void> {
   const saved = current();
-  if (!saved || !(await confirmDialog(L(`Delete "${saved.name}" from this device?`, `„${saved.name}“ von diesem Gerät löschen?`)))) return;
+  if (!saved || !(await confirmDialog(L(`Delete "${saved.name}" from the project?`, `„${saved.name}“ aus dem Projekt löschen?`)))) return;
   roster = roster.filter((s) => s !== saved);
   setCurrent(null);
   storeRoster(L(`Deleted "${saved.name}".`, `„${saved.name}“ gelöscht.`));
@@ -279,11 +280,11 @@ function renderBar(): void {
         changed();
       } },
       { label: L('Export', 'Exportieren'), icon: 'download', run: () => download(`${fileName}.json`, propFile(fileName, prop)) },
-      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: storeTracker([OBJECT_STORE.roster]), run: () => void saveStores([OBJECT_STORE.roster]).then((ok) => { message = ok ? L('Saved to the project (src/content/store); commit it to keep it.', 'Im Projekt gespeichert (src/content/store); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.'); render(); }) },
+      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: contentTracker([OBJECT_STORE.roster]), run: () => void saveContent([OBJECT_STORE.roster]).then((ok) => { message = ok ? L('Saved to the project (src/content); commit it to keep it.', 'Im Projekt gespeichert (src/content); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.'); render(); }) },
       { label: L('Import', 'Importieren'), icon: 'upload', run: () => void importFile() },
       { label: expert ? L('Expert tools: on', 'Expertenwerkzeuge: an') : L('Expert tools: off', 'Expertenwerkzeuge: aus'), icon: 'sliders', run: () => {
         expert = !expert;
-        writeStore(EXPERT_KEY, expert);
+        writeLocal(EXPERT_KEY, expert);
         if (!expert && tab === 'points') tab = 'things';
         render();
       } },

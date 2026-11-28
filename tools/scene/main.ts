@@ -2809,7 +2809,7 @@ function linkFields(it: PlacedItem): Node {
   const scenes: Option[] = [{ id: '', words: t('link.none') }, ...[...targets.keys()].filter((n) => n !== here || (targets.get(n)?.length ?? 0) > 1).map((n) => ({ id: n, words: n }))];
   const label = (o: PlacedItem) => `${t(`link.${o.item}` as Key)} ${o.id} (${Math.floor(o.i)}, ${Math.floor(o.j)})`;
   const ways: Option[] = (target ?? []).filter((o) => o !== it).map((o) => ({ id: o.id!, words: label(o) }));
-  // The game reads only the scenes saved in the project, not those kept on this device.
+  // The game reads only the scenes saved in the project, not unsaved ones.
   const note = !it.to ? '' : !target || !projectCanon.has(it.to.scene) ? t('link.gone') : !there ? t('link.nowhere') : there.to?.scene === here && there.to.id === it.id ? '' : t('link.noreturn');
   return h('div', {},
     fields(

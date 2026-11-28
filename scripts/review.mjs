@@ -2,10 +2,11 @@
 // on, in 3/4 and face on. Loads the code through Vite, because the catalogue reads its item files
 // with import.meta.glob. Usage: node scripts/review.mjs <out.png> [scale]
 import { createServer } from 'vite';
+import { sheets } from '../dev/sheet-plugin.ts';
 import { writeSheet } from './sheet.mjs';
 
 const root = new URL('..', import.meta.url).pathname;
-const server = await createServer({ root, configFile: false, server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
+const server = await createServer({ root, configFile: false, plugins: [sheets()], server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
 const load = (path) => server.ssrLoadModule(root + path);
 const { lookOf, defaultState } = await load('engine/character/character.ts');
 const { drawCharacter, FACING_RING } = await load('engine/core/puppet.ts');

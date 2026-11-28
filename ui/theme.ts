@@ -9,8 +9,16 @@ export const C = {
   lit: '#e8862a', night: '#2f3b6e', moon: '#f3eccf', white: '#ffffff',
 };
 
-/** What each character of an icon's rows paints; '.' is nothing. */
-export const PAINT: Record<string, string> = {
-  x: C.ink, r: '#d9412b', b: '#2f3b6e', g: '#cfe6f2', h: '#8a5a2b', y: '#f6c94a', o: '#e8862a', w: '#4f9ad6', m: '#f6e6a6', s: '#d8c27a', t: '#ffffff',
-  l: '#c9c9c9', d: '#6b6b6b', e: '#a9d98a', f: '#3f7a3a', n: '#8a2a1e',
+/** The editor palette: the named colours of the editor and UI assets (the `icons` sheets, docs/image-spec.md). */
+export const EDITOR_COLORS: Record<string, string> = {
+  ink: C.ink, red: '#d9412b', navy: '#2f3b6e', ice: '#cfe6f2', brown: '#8a5a2b', yellow: '#f6c94a', orange: '#e8862a', blue: '#4f9ad6',
+  cream: '#f6e6a6', sand: '#d8c27a', white: '#ffffff', silver: '#c9c9c9', grey: '#6b6b6b', mint: '#a9d98a', green: '#3f7a3a', maroon: '#8a2a1e',
 };
+
+/** The letter each editor colour has in icon rows (`ICONS`, `drawRows`). */
+export const PAINT_LETTERS: Record<string, string> = {
+  x: 'ink', r: 'red', b: 'navy', g: 'ice', h: 'brown', y: 'yellow', o: 'orange', w: 'blue', m: 'cream', s: 'sand', t: 'white', l: 'silver', d: 'grey', e: 'mint', f: 'green', n: 'maroon',
+};
+
+/** What each character of an icon's rows paints; '.' is nothing. */
+export const PAINT: Record<string, string> = Object.fromEntries(Object.entries(PAINT_LETTERS).map(([ch, name]) => [ch, EDITOR_COLORS[name]]));

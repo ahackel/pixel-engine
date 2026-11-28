@@ -1,9 +1,10 @@
-// Wall pieces as content: the rule-drawn walls the engine ships and the walls painted on this device,
+// Wall pieces as content: the rule-drawn walls the engine ships and the walls painted in the project,
 // for the wall editor (tools/walls) and the games. A rule wall can be frozen into painted art and
 // polished by hand; a frozen built-in wall is LOCKED, and `wallKind` hands games the painted version
 // in its place until it is unlocked. A painted wall can also be exported and kept with a game's content.
 import { cleanArt, type Art } from '../../core/stamp.ts';
-import { newId, readStore, writeStore } from '../../../shared/files.ts';
+import { newId } from '../../../shared/files.ts';
+import { readContent, writeContent } from '../../core/content.ts';
 import type { EdgeKind } from './building.ts';
 import { builtWall, fence } from './pieces/built-wall.ts';
 import { paintedWall } from './pieces/painted-wall.ts';
@@ -42,7 +43,8 @@ export const BUILTIN_WALLS: WallKind[] = [
 /** Whether a wall dissolves while it stands in front of the survivor: all but fences, which are low and seen through anyway. */
 export const wallFades = (w: WallKind) => w.rule?.piece !== 'fence';
 
-export const WALL_STORE = 'pixel-walls';
+/** The walls made and locked: the project's walls.json, painted pixels the walls sheet. */
+export const WALLS_FILE = 'walls.json';
 interface Store { mine: WallKind[]; locks: Record<string, Art> }
 
 const TOPS = ['slope', 'stepped', 'flat'] as const;
@@ -67,7 +69,7 @@ function cleanWall(raw: any): WallKind | null {
   };
 }
 function read(): Store {
-  const raw = readStore<any>(WALL_STORE, null);
+  const raw = readContent<any>(WALLS_FILE, null);
   const locks: Record<string, Art> = {};
   for (const [id, a] of Object.entries(raw?.locks ?? {})) {
     const art = cleanArt(a);
@@ -76,7 +78,7 @@ function read(): Store {
   return { mine: (Array.isArray(raw?.mine) ? raw.mine : []).map(cleanWall).filter((w: WallKind | null): w is WallKind => !!w), locks };
 }
 let store = read();
-const save = () => writeStore(WALL_STORE, store);
+const save = () => writeContent(WALLS_FILE, store);
 export const reloadWalls = () => { store = read(); };
 
 export function wallKinds(): WallKind[] {
@@ -131,7 +133,7 @@ export function deleteWall(id: string): boolean {
   store.mine = store.mine.filter((w) => w.id !== id);
   return save();
 }
-/** Freezes a wall: a built-in one is locked with the art, one of this device becomes painted. */
+/** Freezes a wall: a built-in one is locked with the art, one of the project becomes painted. */
 export function lockWall(id: string, art: Art): boolean {
   const mine = store.mine.find((w) => w.id === id);
   if (mine) Object.assign(mine, { source: 'painted', art, rule: undefined });

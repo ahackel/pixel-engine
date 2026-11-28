@@ -1,5 +1,5 @@
-// The pages of the dev tools, for the pixel header's switcher. `icon` is a name of the pixel icon library (ui/icons.json).
-export type ToolId = 'home' | 'wardrobe' | 'parts' | 'animals' | 'props' | 'objects' | 'flora' | 'walls' | 'particles' | 'scene' | 'icons' | 'ui';
+// The pages of the dev tools, for the pixel header's switcher. `icon` is a name of the pixel icon library (the icons sheet).
+export type ToolId = 'home' | 'wardrobe' | 'parts' | 'animals' | 'props' | 'objects' | 'flora' | 'walls' | 'particles' | 'scene' | 'images' | 'ui';
 export const TOOLS: { id: ToolId; icon: string; name: string }[] = [
   { id: 'home', icon: 'home', name: 'Home' },
   { id: 'wardrobe', icon: 'clothes', name: 'Wardrobe' },
@@ -11,7 +11,7 @@ export const TOOLS: { id: ToolId; icon: string; name: string }[] = [
   { id: 'walls', icon: 'wall', name: 'Walls' },
   { id: 'particles', icon: 'sparks', name: 'Particles' },
   { id: 'scene', icon: 'mountain', name: 'Scene' },
-  { id: 'icons', icon: 'pencil', name: 'Icons' },
+  { id: 'images', icon: 'pencil', name: 'Images' },
   { id: 'ui', icon: 'grid', name: 'Interface' },
 ];
 

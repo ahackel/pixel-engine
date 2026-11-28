@@ -7,9 +7,10 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
+import { sheets } from '../dev/sheet-plugin.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const server = await createServer({ root, configFile: false, server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
+const server = await createServer({ root, configFile: false, plugins: [sheets()], server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
 const load = (p) => server.ssrLoadModule(root + p);
 const { drawAnimal, CLIP_IDS, CLIPS, ANIMAL_W, ANIMAL_H, ANIMAL_ORIGIN } = await load('engine/animals/animal.ts');
 const { PRESETS } = await load('engine/animals/animal-presets.ts');

@@ -3,8 +3,9 @@
 // light and with a roof on. A rule-drawn wall can be frozen into pixels and polished in the shared
 // pixel editor; a frozen built-in wall is locked and the games build with the painted one.
 import '../props/style.css';
-import { canSaveToProject, saveStores, storeTracker } from '../../shared/project.ts';
-import { WALL_STORE } from '../../engine/world/building/walls.ts';
+import { canSaveToProject } from '../../shared/project.ts';
+import { contentTracker, saveContent } from '../../engine/core/content.ts';
+import { WALLS_FILE } from '../../engine/world/building/walls.ts';
 import './style.css';
 import { createScene } from '../../engine/world/scene.ts';
 import { LEVEL_PX, setLevel } from '../../engine/world/terrain.ts';
@@ -17,7 +18,7 @@ import {
 } from '../../engine/world/building/walls.ts';
 import { blankGrid, gridsOf, toArt, type Grid } from '../../engine/core/stamp.ts';
 import { pixelEditor } from '../paint/pixel-editor.ts';
-import { download, pickFile, readStore, writeStore } from '../../shared/files.ts';
+import { download, pickFile, readLocal, writeLocal } from '../../shared/files.ts';
 import { h, history, nameTag, savePicture, snapButton, topBar, undoKeys, word } from '../../shared/shell.ts';
 import { choice, library, numberField, pixelButton, toggle, viewTools, type Library, type Option, confirmDialog, workspace } from '../../ui/components.ts';
 import { currentLang } from '../../shared/lang.ts';
@@ -29,9 +30,9 @@ const L = (en: string, de: string) => (currentLang() === 'de' ? de : en);
 type Tab = 'rule' | 'pixels';
 interface Prefs { id: string; tab: Tab; roof: boolean; height: number; zoom: number }
 const PREFS_KEY = 'pixel-walls-tool';
-const prefs: Prefs = { id: 'plank', tab: 'rule', roof: false, height: 4, zoom: 2, ...readStore<Partial<Prefs>>(PREFS_KEY, {}) };
+const prefs: Prefs = { id: 'plank', tab: 'rule', roof: false, height: 4, zoom: 2, ...readLocal<Partial<Prefs>>(PREFS_KEY, {}) };
 if (!wallById(prefs.id)) prefs.id = 'plank';
-const savePrefs = () => writeStore(PREFS_KEY, prefs);
+const savePrefs = () => writeLocal(PREFS_KEY, prefs);
 const wall = (): WallKind => wallById(prefs.id) ?? wallKinds()[0];
 let message = '';
 let grids: Grid[] | null = null;
@@ -230,7 +231,7 @@ function renderBar(): void {
       { label: L('New painted wall', 'Neue gemalte Wand'), icon: 'plus', run: () => pick(addWall({ name: L('Painted wall', 'Gemalte Wand'), source: 'painted', art: toArt([blankGrid(24, 26)], 4, 22), height: 4 })) },
       { label: L('Duplicate', 'Duplizieren'), icon: 'copy', run: duplicate },
       { label: L('Export', 'Exportieren'), icon: 'download', run: () => download(`${w.name}.json`, wallFile(w)) },
-      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: storeTracker([WALL_STORE]), run: () => void saveStores([WALL_STORE]).then((ok) => { message = ok ? L('Saved to the project (src/content/store); commit it to keep it.', 'Im Projekt gespeichert (src/content/store); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.'); render(); }) },
+      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: contentTracker([WALLS_FILE]), run: () => void saveContent([WALLS_FILE]).then((ok) => { message = ok ? L('Saved to the project (src/content); commit it to keep it.', 'Im Projekt gespeichert (src/content); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.'); render(); }) },
       { label: L('Import', 'Importieren'), icon: 'upload', run: () => void (async () => {
         try {
           const read = readWallFile(await pickFile());
@@ -241,7 +242,7 @@ function renderBar(): void {
         }
       })() },
       { label: L('Delete', 'Löschen'), icon: 'trash', danger: true, disabled: w.builtin, run: async () => {
-        if (!(await confirmDialog(L(`Delete "${w.name}" from this device?`, `„${w.name}“ von diesem Gerät löschen?`)))) return;
+        if (!(await confirmDialog(L(`Delete "${w.name}" from the project?`, `„${w.name}“ aus dem Projekt löschen?`)))) return;
         deleteWall(w.id);
         pick('plank');
       } },
@@ -271,7 +272,7 @@ function render(): void {
   const scroll = panel.scrollTop;
   panel.replaceChildren(...panelFor(prefs.tab));
   panel.scrollTop = scroll;
-  // A built-in wall is shown at the bench's height; one of this device at its own.
+  // A built-in wall is shown at the bench's height; one of the project at its own.
   if (!w.builtin) prefs.height = w.height;
   benchDirty = true;
 }

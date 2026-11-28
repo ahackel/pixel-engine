@@ -3,9 +3,10 @@
 // Usage: node scripts/cropped-check.mjs
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
+import { sheets } from '../dev/sheet-plugin.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const server = await createServer({ root, configFile: false, server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
+const server = await createServer({ root, configFile: false, plugins: [sheets()], server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
 const load = (p) => server.ssrLoadModule(root + p);
 const { drawPlant, drawPlantCropped, grow } = await load('engine/flora/flora.ts');
 const { FLORA, plantOf } = await load('engine/flora/flora-catalog.ts');

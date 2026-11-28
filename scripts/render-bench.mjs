@@ -5,13 +5,14 @@
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
+import { sheets } from '../dev/sheet-plugin.ts';
 
 // Characters fidget at random: seeded, so every run draws the same frames.
 let seed = 1;
 Math.random = () => ((seed = Math.imul(seed ^ (seed >>> 15), 0x2c1b3c6d) + 0x6d2b79f5 | 0) >>> 0) / 2 ** 32;
 const [plants = 300, animals = 40, people = 30] = process.argv.slice(2).map(Number);
 const root = fileURLToPath(new URL('..', import.meta.url));
-const server = await createServer({ root, configFile: false, server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
+const server = await createServer({ root, configFile: false, plugins: [sheets()], server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
 const load = (p) => server.ssrLoadModule(root + p);
 const { createScene } = await load('engine/world/scene.ts');
 const { World, grows } = await load('engine/world/world.ts');

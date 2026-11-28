@@ -2,14 +2,15 @@
 // pictures. The body sliders that make new species live in the Shape tab, behind Expert tools.
 // Built on the shared editor shell, like the wardrobe.
 import { box, tileGrid, confirmDialog, library, section as pixelSection, choice, toggle as pixelToggle, turnView, viewTools, workspace, type Library } from '../../ui/components.ts';
-import { canSaveToProject, saveStores, storeTracker } from '../../shared/project.ts';
+import { canSaveToProject } from '../../shared/project.ts';
+import { contentTracker, saveContent, writeContent } from '../../engine/core/content.ts';
 import {
   ANCHORS, ANIMAL_H, ANIMAL_ORIGIN, ANIMAL_STORE, ANIMAL_W, AnimalSprite, animalFile, CLIP_IDS, CLIPS, COLOR_KEYS, cleanAnimal, DEFAULT_ANIMAL, drawAnimal, EARS, heightOf, HORNS,
   MARKS, NUMBERS, PLANS, readAnimalFile, ROLES, savedAnimals, sizeClassOf, TAILS,
   type Animal, type AnimalFrame, type ClipId, type Feature, type Mark, type NumberKey,
 } from '../../engine/animals/animal.ts';
 import { PRESETS } from '../../engine/animals/animal-presets.ts';
-import { download, newId, pickFile, readStore, writeStore } from '../../shared/files.ts';
+import { download, newId, pickFile, readLocal, writeLocal } from '../../shared/files.ts';
 import { PALETTE, type PaletteKey } from '../../engine/core/palette.ts';
 import { FACING_NAMES, turnFacing, type Facing } from '../../engine/core/puppet.ts';
 import {
@@ -60,12 +61,12 @@ const roleLabel = (r: string) => label(r === 'nose' ? 'noseColor' : r);
 
 // ------------------------------------------------------------------ state
 
-const { draft: DRAFT_KEY, roster: ROSTER_KEY, current: CURRENT_KEY } = ANIMAL_STORE;
+const { roster: ROSTER_KEY, current: CURRENT_KEY } = ANIMAL_STORE;
 interface Saved { id: string; name: string; animal: Animal }
 
-let animal = cleanAnimal(readStore(DRAFT_KEY, PRESETS[0].animal));
+let animal = cleanAnimal(PRESETS[0].animal);
 let roster: Saved[] = savedAnimals();
-let currentId: string | null = readStore<string | null>(CURRENT_KEY, null);
+let currentId: string | null = readLocal<string | null>(CURRENT_KEY, null);
 if (!roster.some((s) => s.id === currentId)) currentId = null;
 
 const current = () => roster.find((s) => s.id === currentId);
@@ -73,7 +74,7 @@ const current = () => roster.find((s) => s.id === currentId);
 if (current()) animal = structuredClone(current()!.animal);
 
 const EXPERT_KEY = 'pixel-animals-expert';
-let expert = readStore<boolean>(EXPERT_KEY, false) === true;
+let expert = readLocal<boolean>(EXPERT_KEY, false) === true;
 
 type TabId = 'species' | 'coat' | 'marks' | 'ears' | 'tail' | 'face' | 'shape';
 const TABS: [TabId, string, string, IconName][] = [
@@ -130,13 +131,13 @@ const undo = history(() => animal, (value) => {
 });
 
 function storeRoster(note = ''): void {
-  message = writeStore(ROSTER_KEY, roster) ? note : L('Could not save: this browser refuses storage here.', 'Nicht gespeichert: Dieser Browser erlaubt hier keinen Speicher.');
+  writeContent(ROSTER_KEY, roster);
+  message = note;
 }
 
 /** Keeps the draft and, if one is picked, its entry in My things. */
 function persist(): void {
   version++;
-  writeStore(DRAFT_KEY, animal);
   const saved = current();
   if (saved) {
     saved.animal = structuredClone(animal);
@@ -154,7 +155,7 @@ function changed(): void {
 }
 function setCurrent(id: string | null): void {
   currentId = id;
-  writeStore(CURRENT_KEY, id);
+  writeLocal(CURRENT_KEY, id);
 }
 function addThing(name: string, from: Animal): void {
   const saved = { id: newId(), name: name.slice(0, 40), animal: structuredClone(from) };
@@ -181,7 +182,7 @@ function renameThing(name: string): void {
 }
 async function remove(): Promise<void> {
   const saved = current();
-  if (!saved || !(await confirmDialog(L(`Delete "${saved.name}" from this device?`, `„${saved.name}“ von diesem Gerät löschen?`)))) return;
+  if (!saved || !(await confirmDialog(L(`Delete "${saved.name}" from the project?`, `„${saved.name}“ aus dem Projekt löschen?`)))) return;
   roster = roster.filter((s) => s !== saved);
   setCurrent(null);
   storeRoster(L(`Deleted "${saved.name}".`, `„${saved.name}“ gelöscht.`));
@@ -437,11 +438,11 @@ function renderBar(): void {
         changed();
       } },
       { label: L('Export', 'Exportieren'), icon: 'download', run: () => download(`${fileName}.json`, animalFile(fileName, animal)) },
-      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: storeTracker([ANIMAL_STORE.roster]), run: () => void saveStores([ANIMAL_STORE.roster]).then((ok) => { message = ok ? L('Saved to the project (src/content/store); commit it to keep it.', 'Im Projekt gespeichert (src/content/store); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.'); render(); }) },
+      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: contentTracker([ANIMAL_STORE.roster]), run: () => void saveContent([ANIMAL_STORE.roster]).then((ok) => { message = ok ? L('Saved to the project (src/content); commit it to keep it.', 'Im Projekt gespeichert (src/content); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.'); render(); }) },
       { label: L('Import', 'Importieren'), icon: 'upload', run: () => void importFile() },
       { label: expert ? L('Expert tools: on', 'Expertenwerkzeuge: an') : L('Expert tools: off', 'Expertenwerkzeuge: aus'), icon: 'sliders', run: () => {
         expert = !expert;
-        writeStore(EXPERT_KEY, expert);
+        writeLocal(EXPERT_KEY, expert);
         if (!expert && tab === 'shape') tab = 'species';
         if (!expert) showPoints = false;
         render();

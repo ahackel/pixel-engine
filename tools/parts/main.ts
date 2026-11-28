@@ -1,10 +1,11 @@
 // The parts editor: every wardrobe item (hair, beards, hats, tops, bottoms, shoes, tools) as the
 // stamps the puppet draws, painted over in the shared pixel editor and seen at once on a figure from
-// all eight sides, with wear. Edits are kept on this device per item (engine/character/parts.ts) and
+// all eight sides, with wear. Edits are kept per item in the project's parts.json and parts sheet (engine/character/parts.ts) and
 // worn everywhere here: the wardrobe, scenes and games read the catalogue with them laid over.
 import '../props/style.css';
-import { canSaveToProject, saveStores, storeTracker } from '../../shared/project.ts';
-import { PARTS_STORE } from '../../engine/character/parts.ts';
+import { canSaveToProject } from '../../shared/project.ts';
+import { contentTracker, saveContent } from '../../engine/core/content.ts';
+import { editedItem, PARTS_FILE } from '../../engine/character/parts.ts';
 import './style.css';
 import { CATALOG, type Entry } from '../../engine/character/catalog.ts';
 import { baseLook, DEFAULT_FACE, facesFor, wear } from '../../engine/character/base.ts';
@@ -16,7 +17,7 @@ import { withSunShadow } from '../../engine/world/island.ts';
 import { PALETTE, SKIN_KEYS, type PaletteKey } from '../../engine/core/palette.ts';
 import { type Grid } from '../../engine/core/stamp.ts';
 import { pixelEditor } from '../paint/pixel-editor.ts';
-import { download, pickFile, readStore, writeStore } from '../../shared/files.ts';
+import { download, pickFile, readLocal, writeLocal } from '../../shared/files.ts';
 import { box, choice, confirmDialog, filterToggles, library, pixelButton, turnView, viewTools, workspace, type Library } from '../../ui/components.ts';
 import { h, history, row, savePicture, section, snapButton, topBar, undoKeys, word, rangeInput } from '../../shared/shell.ts';
 import { currentLang } from '../../shared/lang.ts';
@@ -32,9 +33,9 @@ const SLOT_WORDS: Record<Slot, [string, string]> = {
 
 interface Prefs { id: string; slot: Slot | 'all'; layer: string; facing: Facing; wear: number; skin: PaletteKey; hair: PaletteKey }
 const PREFS_KEY = 'pixel-parts-tool';
-const prefs: Prefs = { id: CATALOG[0].id, slot: 'all', layer: '', facing: 4, wear: 0, skin: 'skinC', hair: 'hairBrown', ...readStore<Partial<Prefs>>(PREFS_KEY, {}) };
+const prefs: Prefs = { id: CATALOG[0].id, slot: 'all', layer: '', facing: 4, wear: 0, skin: 'skinC', hair: 'hairBrown', ...readLocal<Partial<Prefs>>(PREFS_KEY, {}) };
 if (!CATALOG.some((e) => e.id === prefs.id)) prefs.id = CATALOG[0].id;
-const savePrefs = () => writeStore(PREFS_KEY, prefs);
+const savePrefs = () => writeLocal(PREFS_KEY, prefs);
 const entry = (): Entry => CATALOG.find((e) => e.id === prefs.id)!;
 const originalOf = (e: Entry) => e.original ?? e.item;
 /** The item being painted: the entry's own, edited in place, and copied for drawing after every stroke. */
@@ -44,7 +45,7 @@ let message = '';
 
 function store(): void {
   const e = entry();
-  if (!saveEdits(e.id, originalOf(e), working)) message = L('Could not save: this browser refuses storage here.', 'Nicht gespeichert: Dieser Browser erlaubt hier keinen Speicher.');
+  saveEdits(e.id, originalOf(e), working);
   // The catalogue entry follows, so the rest of this page (and a wardrobe opened later) sees the edit.
   const edited = isEdited(e.id);
   if (edited && !e.original) e.original = e.item;
@@ -146,7 +147,7 @@ function layerPanel(): (Node | string)[] {
         'Die Puppe zeichnet diese Stempel auf den bewegten Körper: Kopfstempel drehen mit dem Kopf, der Rumpf mit der Brust, ein Ärmel- oder Hosenstreifen läuft vom Gelenk nach unten. Tippe eine Seite der Figur an, um ihre Ebene zu wählen.'))),
     section(L('Pixels', 'Pixel'), editor.el),
     section(L('Original', 'Original'),
-      h('p', { class: 'note' }, isEdited(e.id) ? L('Polished on this device. The onion skin shows what the rules made.', 'Auf diesem Gerät überarbeitet. Die Zwiebelhaut zeigt, was die Regeln gemacht haben.') : L('As the rules made it.', 'Wie die Regeln es gemacht haben.')),
+      h('p', { class: 'note' }, isEdited(e.id) ? L('Polished by hand. The onion skin shows what the rules made.', 'Von Hand überarbeitet. Die Zwiebelhaut zeigt, was die Regeln gemacht haben.') : L('As the rules made it.', 'Wie die Regeln es gemacht haben.')),
       pixelButton(L('Back to the original', 'Zurück zum Original'), { icon: 'reset' }, async () => {
         if (!(await confirmDialog(L('Go back to the original and lose the painting?', 'Zum Original zurück und die Malerei verlieren?')))) return;
         dropEdits(e.id);
@@ -179,17 +180,19 @@ function renderBar(): void {
     about: [
       L('The wardrobe\'s parts as the pixels the puppet draws: hair, beards, hats, clothes, shoes and tools. Paint over any of them and see it on a figure from all eight sides, with wear.',
         'Die Teile der Garderobe als die Pixel, die die Puppe zeichnet: Haare, Bärte, Hüte, Kleidung, Schuhe und Werkzeuge. Übermale jedes davon und sieh es an einer Figur von allen acht Seiten, mit Abnutzung.'),
-      L('Edits stay on this device and are worn everywhere here: in the wardrobe, scenes and games (engine/character/parts.ts). Export one to keep it with a game.',
-        'Änderungen bleiben auf diesem Gerät und werden hier überall getragen: in der Garderobe, in Szenen und Spielen (engine/character/parts.ts). Exportiere eines, um es mit einem Spiel aufzubewahren.'),
+      L('Save to project writes the edits into the game (src/content/parts.json, their pixels the parts sheet), and they are worn everywhere: in the wardrobe, scenes and games (engine/character/parts.ts).',
+        'Im Projekt speichern schreibt die Änderungen ins Spiel (src/content/parts.json, ihre Pixel das Teile-Blatt), und sie werden überall getragen: in der Garderobe, in Szenen und Spielen (engine/character/parts.ts).'),
     ],
     more: [
       { label: L('Export', 'Exportieren'), icon: 'download', disabled: !isEdited(e.id), run: () => download(`${e.label}.json`, partFile(e.id)) },
-      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: storeTracker([PARTS_STORE]), run: () => void saveStores([PARTS_STORE]).then((ok) => { message = ok ? L('Saved to the project (src/content/store); commit it to keep it.', 'Im Projekt gespeichert (src/content/store); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.'); render(); }) },
+      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: contentTracker([PARTS_FILE]), run: () => void saveContent([PARTS_FILE]).then((ok) => { message = ok ? L('Saved to the project (src/content); commit it to keep it.', 'Im Projekt gespeichert (src/content); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.'); render(); }) },
       { label: L('Import', 'Importieren'), icon: 'upload', run: () => void (async () => {
         try {
           const id = importPart(await pickFile());
-          message = L('Imported; reload to see it everywhere.', 'Importiert; neu laden, um es überall zu sehen.');
-          if (CATALOG.some((x) => x.id === id)) location.reload();
+          const x = CATALOG.find((c) => c.id === id);
+          if (x) { x.original ??= x.item; x.item = editedItem(id, x.original); }
+          message = L('Imported; save to project to keep it.', 'Importiert; im Projekt speichern, um es zu behalten.');
+          render();
         } catch {
           message = L('That file is not a part.', 'Diese Datei ist kein Teil.');
           render();

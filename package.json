@@ -6,10 +6,10 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && tsc --noEmit -p tests && vite build",
-    "bake": "node scripts/bake.mjs",
-    "check:turntable": "node scripts/turntable-check.mjs",
+    "bake": "node --import ./scripts/hooks.mjs scripts/bake.mjs",
+    "check:turntable": "node --import ./scripts/hooks.mjs scripts/turntable-check.mjs",
     "preview": "vite preview --host",
-    "test": "node --test tests/*.test.ts"
+    "test": "node --import ./scripts/hooks.mjs --test tests/*.test.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

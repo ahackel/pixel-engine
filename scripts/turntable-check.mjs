@@ -4,9 +4,10 @@
 // Usage: node scripts/turntable-check.mjs [--all] [--json out.json]. Exits with 1 if any item fails;
 // each failure names the view, so it can be handed back to the model as is.
 import { createServer } from 'vite';
+import { sheets } from '../dev/sheet-plugin.ts';
 
 const root = new URL('..', import.meta.url).pathname;
-const server = await createServer({ root, configFile: false, server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
+const server = await createServer({ root, configFile: false, plugins: [sheets()], server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
 const load = (p) => server.ssrLoadModule(root + p);
 const { lookOf, defaultState } = await load('engine/character/character.ts');
 const { drawCharacter, PART_COLORS: C, SPRITE_W: W, SPRITE_H: H } = await load('engine/core/puppet.ts');

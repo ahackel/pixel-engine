@@ -5,7 +5,7 @@
 // little from the front, in the three tones of the master palette. No outlines.
 import { PAINT_KEYS, PALETTE, type PaletteKey, type Tone } from '../core/palette.ts';
 import { cellHash } from '../../shared/random.ts';
-import { savedList } from '../../shared/files.ts';
+import { contentList } from '../core/content.ts';
 
 import { FACING_VIEWS, type Facing } from '../core/puppet.ts';
 
@@ -1226,10 +1226,10 @@ export const sizeClassOf = (height: number) => SIZE_CLASSES.find((c) => height <
 
 // ------------------------------------------------------------------ files
 
-/** Where the animal editor keeps its work on this device: the animal being worked on, My things, and which of them is picked. */
-export const ANIMAL_STORE = { draft: 'pixel-animal-draft', roster: 'pixel-animals', current: 'pixel-animals-current' } as const;
+/** Where the saved animals are (the project's animals.json), and the preference of which one the editor opens on. */
+export const ANIMAL_STORE = { roster: 'animals.json', current: 'pixel-animals-current' } as const;
 /** The animals in My things. */
-export const savedAnimals = () => savedList(ANIMAL_STORE.roster, 'animal', cleanAnimal);
+export const savedAnimals = () => contentList(ANIMAL_STORE.roster, 'animal', cleanAnimal);
 
 const FILE_TYPE = 'pixel-animal';
 export const animalFile = (name: string, animal: Animal) => JSON.stringify({ type: FILE_TYPE, version: 1, name, animal }, null, 2);

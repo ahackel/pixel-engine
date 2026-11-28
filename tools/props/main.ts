@@ -1,11 +1,12 @@
 // The props tool: one searchable library of everything that stands in the world (plants, objects,
-// decorations, the crate, and what was painted or duplicated on this device), a stage showing the
+// decorations, the crate, and what was painted or duplicated in the project), a stage showing the
 // picked prop beside the survivor from all eight directions, and four tabs: Views, Shape, Features and
 // Pixels. Any prop can be frozen into pixels and polished by hand; a catalogue prop is then locked,
 // and scenes and games draw the painted version (docs/props.md).
 import './style.css';
-import { canSaveToProject, saveStores, storeTracker } from '../../shared/project.ts';
-import { PROP_STORE } from '../../engine/world/prop.ts';
+import { canSaveToProject } from '../../shared/project.ts';
+import { contentTracker, readContent, saveContent, writeContent } from '../../engine/core/content.ts';
+import { PROPS_FILE } from '../../engine/world/prop.ts';
 import { outfitLook } from '../../engine/character/character.ts';
 import { AUTHORED } from '../../engine/core/poses.ts';
 import { CHARACTER_ORIGIN as FEET, drawCharacter, SPRITE_H, SPRITE_W, type Sprite } from '../../engine/core/puppet.ts';
@@ -20,7 +21,7 @@ import {
 import { freeze } from '../../engine/core/stamp.ts';
 import { buildPanel, type BuildTab } from '../objects/build-panel.ts';
 import { pixelEditor } from '../paint/pixel-editor.ts';
-import { download, pickFile, readStore, writeStore } from '../../shared/files.ts';
+import { download, pickFile, readLocal, writeLocal } from '../../shared/files.ts';
 import { choice, filterToggles, library, pixelButton, toggle, turnView, viewTools, type Library, type Option as Pick, confirmDialog, workspace } from '../../ui/components.ts';
 import { checkbox, h, history, nameTag, row, savePicture, section, segmented, snapButton, tabs, topBar, undoKeys, word, type IconName, rangeInput } from '../../shared/shell.ts';
 import { currentLang } from '../../shared/lang.ts';
@@ -57,10 +58,10 @@ const GROUNDS = [['Sand', 'Sand', '#e9d9a0'], ['Grass', 'Gras', '#8fcf78'], ['Fl
 const prefs: Prefs = {
   id: propKinds()[0]?.id ?? '', tab: 'views', dir: 0, source: 'all', feature: 'all', hidden: false, person: true, colliders: false,
   ground: GROUNDS[0][2], playing: true, view: 0, shape: 'parts',
-  ...readStore<Partial<Prefs>>(PREFS_KEY, {}),
+  ...readLocal<Partial<Prefs>>(PREFS_KEY, {}),
 };
 if (!propKind(prefs.id)) prefs.id = propKinds()[0]?.id ?? '';
-const savePrefs = () => writeStore(PREFS_KEY, prefs);
+const savePrefs = () => writeLocal(PREFS_KEY, prefs);
 let message = '';
 let selectedPart = 0;
 const kind = (): PropKind => propKind(prefs.id) ?? propKinds()[0];
@@ -357,7 +358,7 @@ function pretty(v: unknown): string {
   return JSON.stringify(v, null, 1).replace(/\n\s+([\]}])/g, ' $1').replace(/\[\n\s+/g, '[').replace(/,\n\s+(?=[-\d"])/g, ', ');
 }
 function floraState(): { custom: Record<string, string> } & Record<string, unknown> {
-  const s = readStore<any>(FLORA_STORE, null);
+  const s = readContent<any>(FLORA_STORE, null);
   return s && typeof s === 'object' ? { ...s, custom: s.custom && typeof s.custom === 'object' ? s.custom : {} } : { custom: {} };
 }
 
@@ -385,7 +386,7 @@ function shapePanel(k: PropKind): (Node | string)[] {
         const s = floraState();
         if (area.value.trim() === pretty(original).trim()) delete s.custom[k.id];
         else s.custom[k.id] = area.value;
-        writeStore(FLORA_STORE, s);
+        writeContent(FLORA_STORE, s);
         setEditedPlant(k.id, parsed.compiled.plant);
         stageDirty = true;
         thumbVersion++;
@@ -415,7 +416,7 @@ function shapePanel(k: PropKind): (Node | string)[] {
         const roster = savedProps();
         const saved = roster.find((s) => `my-object:${s.id}` === k.id);
         if (saved) saved.prop = cleanBuild(build);
-        writeStore(OBJECT_STORE.roster, roster);
+        writeContent(OBJECT_STORE.roster, roster);
         reloadProps();
       } else changeKind(k.id, { build: cleanBuild(build) as Build });
     };
@@ -475,11 +476,11 @@ function renderBar(): void {
     title: word('props'),
     name: name.el,
     about: [
-      L('Everything that stands in the world, in one library: plants grown by rule, objects built from parts, decorations, and props painted on this device. Search by name, tag, source or feature.',
-        'Alles, was in der Welt steht, in einer Bibliothek: nach Regeln gewachsene Pflanzen, aus Teilen gebaute Objekte, Dekorationen und auf diesem Gerät gemalte Requisiten. Suche nach Name, Schlagwort, Herkunft oder Eigenschaft.'),
+      L('Everything that stands in the world, in one library: plants grown by rule, objects built from parts, decorations, and props painted in the project. Search by name, tag, source or feature.',
+        'Alles, was in der Welt steht, in einer Bibliothek: nach Regeln gewachsene Pflanzen, aus Teilen gebaute Objekte, Dekorationen und im Projekt gemalte Requisiten. Suche nach Name, Schlagwort, Herkunft oder Eigenschaft.'),
       L('Freeze any prop to keep its pixels and polish them by hand. A frozen catalogue prop is locked: the scene editor and games draw the painted pixels instead of the rule, until it is unlocked.',
         'Friere jede Requisite ein, um ihre Pixel zu behalten und von Hand nachzuarbeiten. Eine eingefrorene Katalog-Requisite ist gesperrt: Szeneneditor und Spiele zeichnen die gemalten Pixel statt der Regel, bis sie entsperrt wird.'),
-      L('Props are kept on this device (engine/world/prop.ts) and exported as JSON of type "pixel-prop".', 'Requisiten bleiben auf diesem Gerät (engine/world/prop.ts) und werden als JSON vom Typ „pixel-prop“ exportiert.'),
+      L('Props are saved to the project (src/content/props.json, painted pixels the props sheet; engine/world/prop.ts) and exported as JSON of type "pixel-prop".', 'Requisiten werden im Projekt gespeichert (src/content/props.json, gemalte Pixel im Requisiten-Blatt; engine/world/prop.ts) und als JSON vom Typ „pixel-prop“ exportiert.'),
     ],
     actions: [
       { label: L('New painted prop', 'Neue gemalte Requisite'), icon: 'plus', run: () => pickKind(newPainted(L('Painted prop', 'Gemalte Requisite'))) },
@@ -488,12 +489,12 @@ function renderBar(): void {
     more: [
       { label: k.art ? L('Already frozen', 'Schon eingefroren') : L('Freeze into pixels', 'In Pixel einfrieren'), icon: 'lock', disabled: !!k.art, run: () => { lockKind(k); grids = null; prefs.tab = 'pixels'; undo.commit(); render(); } },
       { label: L('Export', 'Exportieren'), icon: 'download', run: () => download(`${k.name}.json`, propKindFile(k)) },
-      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: storeTracker([PROP_STORE, FLORA_STORE, OBJECT_STORE.roster]), run: () => void saveStores([PROP_STORE, FLORA_STORE, OBJECT_STORE.roster]).then((ok) => { message = ok ? L('Saved to the project (src/content/store); commit it to keep it.', 'Im Projekt gespeichert (src/content/store); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.'); render(); }) },
+      { label: L('Save to project', 'Im Projekt speichern'), icon: 'download', main: true, disabled: !canSaveToProject(), track: contentTracker([PROPS_FILE, FLORA_STORE, OBJECT_STORE.roster]), run: () => void saveContent([PROPS_FILE, FLORA_STORE, OBJECT_STORE.roster]).then((ok) => { message = ok ? L('Saved to the project (src/content); commit it to keep it.', 'Im Projekt gespeichert (src/content); committe es, um es zu behalten.') : L('Nothing saved: change something first, and run the local dev server.', 'Nichts gespeichert: ändere erst etwas und starte den lokalen Dev-Server.'); render(); }) },
       { label: L('Import', 'Importieren'), icon: 'upload', run: () => void importFile() },
       k.builtin
         ? { label: isHidden(k.id) ? L('Show in the library', 'In der Bibliothek zeigen') : L('Hide from the library', 'In der Bibliothek verbergen'), icon: 'close', run: () => { setHidden(k.id, !isHidden(k.id)); render(); } }
         : { label: L('Delete', 'Löschen'), icon: 'trash', danger: true, disabled: k.id.startsWith('my-object:'), run: async () => {
-          if (!(await confirmDialog(L(`Delete "${k.name}" from this device?`, `„${k.name}“ von diesem Gerät löschen?`)))) return;
+          if (!(await confirmDialog(L(`Delete "${k.name}" from the project?`, `„${k.name}“ aus dem Projekt löschen?`)))) return;
           deleteKind(k.id);
           message = L(`Deleted "${k.name}".`, `„${k.name}“ gelöscht.`);
           pickKind(propKinds()[0].id);

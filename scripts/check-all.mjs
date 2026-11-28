@@ -1,4 +1,5 @@
-// Compiles every generated file and reports what is valid, repaired or rejected.
+// Compiles every generated item (the recipe answers and the wear sheet's sprite items) and reports what is valid,
+// repaired or rejected. Run with the sheet hook: node --import ./scripts/hooks.mjs scripts/check-all.mjs [out.png]
 // With an output path, also renders each candidate standing, front and back.
 import fs from 'node:fs';
 import { writeSheet } from './sheet.mjs';
@@ -6,16 +7,27 @@ import { drawCharacter } from '../engine/core/puppet.ts';
 import { STAND } from '../engine/core/poses.ts';
 import { baseLook, wear } from '../engine/character/base.ts';
 import { compile } from '../engine/character/items.ts';
+import { spriteInput, WEAR } from '../engine/character/wear-sheet.ts';
 
 const only = process.argv[3]?.split(',');
 const look = baseLook();
 const rows = [];
 let valid = 0, repaired = 0, rejected = 0;
-for (const file of fs.readdirSync('engine/character/data').filter((f) => /^(sprite|recipe)-.*\.json$/.test(f)).sort()) {
+// The recipe answers as the model wrote them, and the sprite items as the wear sheet keeps them.
+const sets = new Map();
+for (const file of fs.readdirSync('engine/character/data').filter((f) => /^recipe-.*\.json$/.test(f)).sort()) {
+  try { sets.set(file, JSON.parse(fs.readFileSync(`engine/character/data/${file}`, 'utf8'))); } catch (e) { console.log(`${file}: not valid JSON (${e.message})`); rejected++; }
+}
+for (const name of Object.keys(WEAR.images).sort()) {
+  const [, set, n] = name.match(/^sprite-(.+)-(\d+)$/) ?? [];
+  if (!set) continue;
+  const file = `sprite-${set}.json`;
+  if (!sets.has(file)) sets.set(file, []);
+  sets.get(file)[+n] = spriteInput(WEAR.images[name]);
+}
+for (const [file, list] of [...sets].sort(([a], [b]) => (a < b ? -1 : 1))) {
   const [, format, set] = file.match(/^(sprite|recipe)-(.*)\.json$/);
   if (only && !only.includes(set)) continue;
-  let list;
-  try { list = JSON.parse(fs.readFileSync(`engine/character/data/${file}`, 'utf8')); } catch (e) { console.log(`${file}: not valid JSON (${e.message})`); rejected++; continue; }
   const row = [];
   list.forEach((candidate, i) => {
     const result = compile(format, candidate);

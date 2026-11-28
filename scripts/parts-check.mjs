@@ -5,10 +5,11 @@
 //   node scripts/parts-check.mjs [sheet.png]
 // With a path, the failing frames are drawn there in the parts colours, each next to its normal drawing.
 import { createServer } from 'vite';
+import { sheets } from '../dev/sheet-plugin.ts';
 import { writeSheet } from './sheet.mjs';
 
 const root = new URL('..', import.meta.url).pathname;
-const server = await createServer({ root, configFile: false, server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
+const server = await createServer({ root, configFile: false, plugins: [sheets()], server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
 const load = (path) => server.ssrLoadModule(root + path);
 const { lookOf, defaultState } = await load('engine/character/character.ts');
 const { drawCharacter, PART_COLORS, SPRITE_W, SPRITE_H } = await load('engine/core/puppet.ts');

@@ -1,9 +1,10 @@
 // The wardrobe: the character editor the island game opens before each new game (engine/character/editor.ts), with every
 // row and a tab for how the preview shows the character, and around it the tools' bar: the characters kept on this
-// device, undo, a random one, and the page where the eye and mouth shapes are drawn.
+// device, undo, a random one, and a link to the faces in the image editor, where eyes, mouths and brows are painted.
 import { confirmDialog, library, pixelButton, sidePanel, type Library } from '../../ui/components.ts';
 import { BROWS, EYE_COLORS, EYE_SHAPES, GLASSES_COLORS, HAIR_STYLES, HEAD_SHAPES, MOODS, NOSES } from '../../engine/character/base.ts';
-import { canSaveToProject, saveStores, storeTracker } from '../../shared/project.ts';
+import { canSaveToProject } from '../../shared/project.ts';
+import { contentTracker, saveContent } from '../../engine/core/content.ts';
 import { ROSTER_KEY } from '../../engine/character/character.ts';
 import { CATALOG, CLOTH_KEYS, entryById, type Entry } from '../../engine/character/catalog.ts';
 import {
@@ -13,39 +14,23 @@ import {
 import { characterEditor, type Editor, type Tab } from '../../engine/character/editor.ts';
 import { SKIN_KEYS } from '../../engine/core/palette.ts';
 import { AUTHORED, STAND } from '../../engine/core/poses.ts';
-import { BODY_WINDOW, BUILDS, drawCharacter, FACING_VIEWS, type Facing } from '../../engine/core/puppet.ts';
+import { BODY_WINDOW, BUILDS, drawCharacter } from '../../engine/core/puppet.ts';
 import { WEAR_MAX } from '../../engine/character/wear.ts';
 import { cheer, h, history, NAMES, nameTag, pick, pickStart, shuffled, topBar, undoKeys, word } from '../../shared/shell.ts';
 import { currentLang, LANGS } from '../../shared/lang.ts';
 import { fitWhole, paintSprite, pictureCache, type Rect } from '../../shared/pixels.ts';
 import { itemName, missingItemNames, t, type Key } from './i18n.ts';
-import { shapeEditor } from './shapes.ts';
+import { toolHref } from '../../shared/tools.ts';
 import './wardrobe.css';
 
 // ------------------------------------------------------------------ state
 
-const STORAGE_KEY = 'castaway-wardrobe';
-
-function loadState(): State {
-  try {
-    return cleanState(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null'));
-  } catch {
-    // Saved looks are a convenience. Without storage the wardrobe starts from the default.
-    return defaultState();
-  }
-}
-
-function saveState(): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // Ignore: private windows and embedded previews may refuse storage.
-  }
-}
+/** The character being dressed: the one picked in My things (below), else the default. Kept in memory only; saved ones are project content. */
+const loadState = (): State => defaultState();
+/** A character not picked in My things is not kept: save it as one to keep it. */
+const saveState = (): void => {};
 
 let state = loadState();
-/** The eye and mouth shape editor has a page of its own, at #shapes. */
-let shapesPage = location.hash === '#shapes';
 /** How the preview shows the character: what it does, the head turned (eighths, to its left), the eyes aside. */
 let clipKey = 'idle';
 let gaze = 0;
@@ -74,23 +59,17 @@ const name = nameTag();
 name.onRename((value) => renameThing(value));
 let message = '';
 let editor: Editor | null = null;
-// The shape editor's panel at the right, as wide as it is dragged; the character editor makes room for it (--shapes-w).
-const shapes = sidePanel('right', 'pixel-wardrobe-shapes', 560);
-shapes.panel.classList.add('wardrobe__shapes');
-shapes.panel.setAttribute('aria-label', t('shapes'));
-const shapesSlot = shapes.body;
-new ResizeObserver(() => stage.style.setProperty('--shapes-w', `${shapes.panel.offsetWidth}px`)).observe(shapes.panel);
 // My things at the left, as in every editor.
 const shelfSide = sidePanel('left', 'pixel-wardrobe-left', 240);
 let shelf: Library | undefined;
 
-// My things: saved characters on this device, shared with the scene editor. The working character
-// is kept on every change as before; while a saved one is picked, changes go straight into it.
+// My things: the characters saved in the project (characters.json), shared with the scene editor. While a saved one is
+// picked, changes go straight into it (in memory until Save to project).
 let roster = loadRoster();
 let currentId = pickedCharacter();
 if (!roster.some((c) => c.id === currentId)) currentId = roster.length === 1 ? roster[0].id : null;
 const current = () => roster.find((c) => c.id === currentId);
-// Opening the wardrobe shows the character picked in My things, even if the draft moved on.
+// Opening the wardrobe shows the character picked in My things.
 if (current()) state = cleanState(structuredClone(current()!.state));
 
 function setCurrent(id: string | null): void {
@@ -240,7 +219,7 @@ function renderBar(): void {
       { label: t('saved.new'), icon: 'plus', run: newThing },
       { label: saved ? t('saved.copy') : t('saved.keep'), icon: 'copy', run: copyThing },
       { label: t('reset'), icon: 'reset', run: () => { state = defaultState(); changed(); } },
-      { label: t('saved.project'), icon: 'download', main: true, disabled: !canSaveToProject(), track: storeTracker([ROSTER_KEY]), run: () => void saveStores([ROSTER_KEY]).then((ok) => { message = t(ok ? 'saved.projectDone' : 'saved.projectNone'); render(); }) },
+      { label: t('saved.project'), icon: 'download', main: true, disabled: !canSaveToProject(), track: contentTracker([ROSTER_KEY]), run: () => void saveContent([ROSTER_KEY]).then((ok) => { message = t(ok ? 'saved.projectDone' : 'saved.projectNone'); render(); }) },
       { label: t('saved.export'), icon: 'download', run: () => download(`${saved?.name ?? t('saved.default')}.json`, characterFile({ id: '', name: saved?.name ?? t('saved.default'), state })) },
       { label: t('saved.import'), icon: 'upload', run: () => void importThing() },
       { label: t('saved.delete'), icon: 'trash', run: deleteThing, danger: true, disabled: !saved },
@@ -249,7 +228,8 @@ function renderBar(): void {
     undo: undo.undo,
     redo: undo.redo,
     shuffle: () => shuffle(),
-    extra: pixelButton(t('shapes'), { icon: 'face', flat: true, pressed: shapesPage }, () => openShapes(!shapesPage)),
+    // The eyes, mouths and brows are painted in the image editor, on its faces sheet.
+    extra: pixelButton(t('shapes'), { icon: 'face', flat: true }, () => void (location.href = `${toolHref('images')}#faces`)),
     relabel: () => {
       mount();
       render();
@@ -316,54 +296,13 @@ function shuffle(): void {
   changed();
 }
 
-/** Opens or leaves the shape editor's page; the browser's back button leaves it too. */
-function openShapes(open: boolean): void {
-  if (open === shapesPage) return;
-  if (open) location.hash = 'shapes';
-  else {
-    window.history.pushState(null, '', location.pathname + location.search);
-    syncShapes();
-  }
-}
-function syncShapes(): void {
-  shapesPage = location.hash === '#shapes';
-  render();
-}
-window.addEventListener('hashchange', syncShapes);
-window.addEventListener('popstate', syncShapes);
-
-function shapesView(): void {
-  const head = h('div', { class: 'shapes-head' },
-    pixelButton(t('shapes.back'), { icon: 'left' }, () => openShapes(false)),
-    h('h2', {}, t('shapes')));
-  // From behind there is no face to edit.
-  const seen = FACING_VIEWS[facing()];
-  if (!seen.face) return void shapesSlot.replaceChildren(head, h('p', { class: 'note shapes__away' }, t('shapes.away')));
-  shapesSlot.replaceChildren(head, shapeEditor({
-    face: state.face, skin: state.skin, hair: state.hairColor, mood: state.mood, aside: eyesAside,
-    live: () => version++,
-    done: () => {
-      version++;
-      render();
-    },
-    // Face on edits the front view, left and right the side view.
-    view: seen.face,
-    mirror: seen.mirror,
-  }));
-}
-
 function render(): void {
   renderBar();
   shelf?.redraw();
   const saved = current();
   name.set(saved?.name ?? '', t('saved.none'));
-  stage.classList.toggle('wardrobe--shapes', shapesPage);
-  if (shapesPage) shapesView();
   editor?.refresh();
 }
-
-/** The facing the preview shows, for the shape editor. */
-const facing = (): Facing => editor?.facing() ?? 0;
 
 /** Builds the page. Called again when the language changes, since every label is rebuilt. */
 function mount(): void {
@@ -377,10 +316,8 @@ function mount(): void {
     random: shuffle,
     preview: () => ({ clip: clipKey, look: gaze, aside: eyesAside, worn: true }),
     nameOf: (_, v) => (typeof v === 'string' ? pieceName(v) : undefined),
-    // The shape editor edits the view the preview shows.
-    turned: () => shapesPage && render(),
   });
-  stage.replaceChildren(editor, shapes.panel);
+  stage.replaceChildren(editor);
   shelf = library({ key: 'pixel-wardrobe', label: word('search'), empty: word('nothing'), items: shelfItems, selected: () => currentId ?? '', pick: pickThing });
   shelfSide.body.replaceChildren(shelf);
   root.replaceChildren(h('div', { class: 'shell' }, barSlot, h('main', { class: 'shell__main wardrobe__main' }, shelfSide.panel, h('div', { class: 'wardrobe__room' }, stage))));

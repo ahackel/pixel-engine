@@ -6,10 +6,11 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
+import { sheets } from '../dev/sheet-plugin.ts';
 
 const [file, frames = 60] = process.argv.slice(2);
 const root = fileURLToPath(new URL('..', import.meta.url));
-const server = await createServer({ root, configFile: false, server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
+const server = await createServer({ root, configFile: false, plugins: [sheets()], server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' });
 const load = (p) => server.ssrLoadModule(root + p);
 const { World } = await load('engine/world/world.ts');
 const { readSceneFile } = await load('engine/world/scene.ts');

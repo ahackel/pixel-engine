@@ -1,5 +1,6 @@
 import type { Cell, PaletteKey } from '../core/palette.ts';
-import shapesFile from './face-shapes.json' with { type: 'json' };
+import facesSheet from './images/faces.png?sheet';
+import { names, sheet } from '../core/images.ts';
 import { beardBehind, HEAD_FRAME, HEAD_STAMP, TORSO_FRAME, parseStamp, type Item, type Look, type OwnView, type Slot, type Stamp, type StampPair } from '../core/puppet.ts';
 
 // The foundation set: the bare head, its faces, a first hairstyle and the undershorts.
@@ -327,10 +328,11 @@ const ROUND_EAST = [
 // ------------------------------------------------------------------ eye and mouth shapes
 
 /**
- * The eyes and mouths every character uses, drawn by hand in the wardrobe's shape editor and
- * kept in face-shapes.json. Eyes come in pairs (one eye side on), per view, eye shape and state;
+ * The eyes and mouths every character uses, drawn by hand in the image editor and kept in the
+ * `faces` sheet (images/faces.png): an image per view and shape, a frame per state. Eyes come in pairs (one eye side on), per view, eye shape and state;
  * mouths per view and mood, brows per view, brow style and mood. Letters: I ink, C eye colour,
- * T white, M mouth, % shaded skin, e brow (the hair colour's shade).
+ * T white, M mouth, % shaded skin, e brow (the hair colour's shade); in the sheet the roles face.ink,
+ * face.eye, face.white, face.mouth, face.skin- and face.brow.
  */
 export const FACE_VIEWS = ['diagonal', 'front', 'side'] as const;
 export type FaceView = (typeof FACE_VIEWS)[number];
@@ -345,14 +347,27 @@ export interface FaceShapes {
 export const BROW_STATES = ['plain', 'surprised', 'angry', 'sad'] as const;
 export type BrowState = (typeof BROW_STATES)[number];
 export const browState = (mood: Mood): BrowState => (mood === 'surprised' || mood === 'angry' || mood === 'sad' ? mood : 'plain');
-/** Live: the shape editor changes these in place and the faces are built again. */
-// A game's own face shapes (what its wardrobe saved into src/content) replace the engine's. The glob is empty where there are none;
-// under plain Node (the scripts) there is no glob at all.
-let gameShapes: unknown;
-try {
-  gameShapes = Object.values(import.meta.glob('/src/content/face-shapes.json', { eager: true, import: 'default' }))[0];
-} catch {}
-export const FACE_SHAPES = structuredClone(gameShapes ?? shapesFile) as FaceShapes;
+/** The face roles' letters by their names in the `faces` sheet. */
+const ROLE_LETTER: Record<string, string> = { 'face.ink': 'I', 'face.eye': 'C', 'face.white': 'T', 'face.mouth': 'M', 'face.skin-': '%', 'face.brow': 'e' };
+/** The faces sheet's images as stamps of role letters: a frame per state (EYE_STATES, MOODS, BROW_STATES). */
+function shapesOf(): FaceShapes {
+  const faces = sheet('faces', facesSheet);
+  const frames = (name: string) => {
+    const img = faces.images[name];
+    if (!img) throw new Error(`the faces sheet has no image ${name}`);
+    return (f: number) => names(img, f).map((row) => row.map((n) => (n && ROLE_LETTER[n]) || '.').join(''));
+  };
+  const out = { eyes: {}, mouths: {}, brows: {} } as FaceShapes;
+  for (const view of FACE_VIEWS) {
+    out.eyes[view] = Object.fromEntries(EYE_SHAPES.map((shape) => { const f = frames(`eyes-${view}-${shape}`); return [shape, Object.fromEntries(EYE_STATES.map((st, i) => [st, f(i)]))]; })) as FaceShapes['eyes'][FaceView];
+    const m = frames(`mouths-${view}`);
+    out.mouths[view] = Object.fromEntries(MOODS.map((mood, i) => [mood, m(i)])) as FaceShapes['mouths'][FaceView];
+    out.brows[view] = Object.fromEntries(BROWS.map((style) => { const f = frames(`brows-${view}-${style}`); return [style, Object.fromEntries(BROW_STATES.map((st, i) => [st, f(i)]))]; })) as FaceShapes['brows'][FaceView];
+  }
+  return out;
+}
+/** The eyes, mouths and brows, from the `faces` sheet (images/faces.png, painted in the image editor; a game's own laid over by image name). */
+export const FACE_SHAPES: FaceShapes = shapesOf();
 /** Where each stamp sits on the 21-wide head grid: column, row, width, height. */
 export const FACE_REGIONS: Record<'eyes' | 'mouths' | 'brows', Record<FaceView, [number, number, number, number]>> = {
   eyes: { diagonal: [8, 11, 9, 4], front: [6, 11, 9, 4], side: [13, 11, 4, 4] },
